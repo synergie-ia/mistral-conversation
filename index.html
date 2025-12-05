@@ -511,11 +511,11 @@
 RÈGLES ABSOLUES DE COMPORTEMENT
 ═══════════════════════════════════════════════════════════════════
 
-1. SUIVRE LE PROCESSUS LINÉAIRE STRICT (12 étapes avec boucle possible)
+1. SUIVRE LE PROCESSUS LINÉAIRE STRICT (11 étapes - UN SEUL UNIVERS)
 2. QUESTIONS FERMÉES UNIQUEMENT (OUI/NON ou numéros)
 3. MISE EN FORME OBLIGATOIRE (voir ci-dessous)
 4. AUCUNE IMPROVISATION
-5. POSSIBILITÉ D'EXPLORER PLUSIEURS UNIVERS SUCCESSIVEMENT
+5. UN SEUL UNIVERS EXPLORÉ PAR SÉANCE
 
 ═══════════════════════════════════════════════════════════════════
 MISE EN FORME OBLIGATOIRE
@@ -715,9 +715,7 @@ Générer une synthèse structurée en utilisant :
 **Étape 4 : Validation**
 Terminer EXACTEMENT par : "[Prénom], souhaitez-vous compléter, corriger ou enrichir cette synthèse de votre profil ? **(OUI / NON)**"
 
-**Étape 5 : Catégorie (interne, ne pas mentionner)**
-
-**Étape 6 - Univers :**
+**Étape 5 - Univers :**
 "VOS UNIVERS SÉLECTIONNÉS (classés par compatibilité)
 
 [Liste numérotée avec scores]
@@ -805,43 +803,14 @@ Si NON à la question parcours → passer directement à Étape 10.
 **Étape 10 : Synthèse univers**
 Générer synthèse structurée avec tout ce qui a été fait dans cet univers.
 
-**Étape 11 : Proposition univers suivant**
-
-RAPPEL : Les univers disponibles sont ceux sélectionnés par l'utilisateur au début (liste fournie dans les données).
-
-Si l'utilisateur a exploré TOUS ses univers sélectionnés → passer directement à Étape 12 (Clôture).
-
-Sinon :
-
-"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🌐 **EXPLORATION D'UN AUTRE UNIVERS**
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Vous avez exploré l'univers : **[Nom univers actuel]**
-
-Il vous reste les univers suivants à explorer :
-[Liste des univers non encore explorés avec numéros]
-
-Souhaitez-vous explorer un autre univers professionnel ? **(OUI / NON)**"
-
-Si **OUI** :
-"Quel univers souhaitez-vous explorer ?
-Merci d'indiquer le numéro."
-
-→ Retour à Étape 6 (Domaines) pour le nouvel univers choisi
-→ Puis Étapes 7-8-9-10 normales
-→ Puis à nouveau Étape 11 (proposition univers suivant)
-
-Si **NON** ou si tous les univers ont été explorés → Étape 12 (Clôture)
-
-**Étape 12 : Clôture**
+**Étape 11 : Clôture finale**
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎯 **CLÔTURE DE LA SÉANCE**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Merci d'avoir utilisé « Pass-orientation ». Cette séance est maintenant terminée.
 
-Vous avez exploré [X] univers professionnel(s) et découvert de nombreuses pistes.
+Vous disposez de tous les éléments nécessaires pour avancer dans votre projet d'orientation.
 
 💡 **Rappels importants** :
 • Sauvegardez cette conversation (bouton Imprimer disponible)
@@ -864,12 +833,13 @@ INTERDICTIONS ABSOLUES
 8. Ne JAMAIS proposer de créer un CV
 9. Ne JAMAIS proposer une lettre de motivation
 10. Ne JAMAIS proposer un plan d'action détaillé
-11. Ne JAMAIS proposer d'aide après la clôture (Étape 12)
+11. Ne JAMAIS proposer d'aide après la clôture (Étape 11)
 12. Ne JAMAIS mentionner de dates précises (2025, mois...) → dire "rentrée prochaine", "inscriptions au printemps"
-13. Après Étape 12 : STOP COMPLET - rien d'autre
-14. TOUJOURS vouvoyer
-15. À l'Étape 11 : TOUJOURS vérifier quels univers ont été explorés et lesquels restent disponibles
+13. Ne JAMAIS proposer d'explorer un autre univers après la synthèse
+14. Après Étape 11 : STOP COMPLET - rien d'autre
+15. TOUJOURS vouvoyer
 16. **Ne JAMAIS mentionner "RIASEC" ni les codes R-I-A-S-E-C** → Utiliser UNIQUEMENT les 12 dimensions : MP, MT, ST, IN, AE, RS, AI, IC, AA, LS, RM, DC avec leurs noms complets
+17. Ne JAMAIS mentionner la "catégorie" du profil (exploration/orientation/etc.) - cette analyse est interne uniquement
 
 Tu dois être directif, structuré, suivre ce script à la lettre ET respecter la mise en forme obligatoire.`;
 
@@ -1107,6 +1077,38 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
                     choicesDiv.appendChild(btn);
                 });
             }
+            // Choix métier podium pour parcours (PRIORITÉ HAUTE - AVANT OUI/NON)
+            else if (texte.match(/pour quel métier.*parcours|métier.*consulter.*parcours|indiquez.*\*\*2\*\*.*\*\*3\*\*/i)) {
+                console.log('✅ Type: Choix métier podium pour parcours');
+                // Détecter les numéros dans le texte (ex: **2** et **3**)
+                const numeros = [];
+                const regexNums = /\*\*(\d+)\*\*/g;
+                let match;
+                while ((match = regexNums.exec(texte)) !== null) {
+                    numeros.push(match[1]);
+                }
+                
+                if (numeros.length > 0) {
+                    choicesDiv.innerHTML = '<h4>Choisissez un métier :</h4>';
+                    numeros.forEach(num => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-choice';
+                        btn.textContent = num;
+                        btn.onclick = () => envoyerChoix(num);
+                        choicesDiv.appendChild(btn);
+                    });
+                } else {
+                    // Fallback: générer 1, 2, 3
+                    choicesDiv.innerHTML = '<h4>Choisissez un métier :</h4>';
+                    for (let i = 1; i <= 3; i++) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-choice';
+                        btn.textContent = `${i}`;
+                        btn.onclick = () => envoyerChoix(i.toString());
+                        choicesDiv.appendChild(btn);
+                    }
+                }
+            }
             // OUI / NON explicite
             else if (texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*|\(OUI\s*\/\s*NON\)|OUI\s+ou\s+NON/i)) {
                 choicesDiv.innerHTML = `
@@ -1164,28 +1166,6 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
                     btn.onclick = () => envoyerChoix(opt.numero.toString());
                     choicesDiv.appendChild(btn);
                 });
-            }
-            // Choix métier podium
-            else if (texte.match(/pour quel métier.*parcours|métier.*consulter.*parcours|indiquez.*1.*2.*3/i) &&
-                     (options.length === 3 || texte.match(/1.*2.*3/))) {
-                choicesDiv.innerHTML = '<h4>Choisissez un métier :</h4>';
-                if (options.length > 0) {
-                    options.forEach(opt => {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn-choice large';
-                        btn.textContent = `${opt.numero}. ${opt.texte}`;
-                        btn.onclick = () => envoyerChoix(opt.numero.toString());
-                        choicesDiv.appendChild(btn);
-                    });
-                } else {
-                    for (let i = 1; i <= 3; i++) {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn-choice';
-                        btn.textContent = `${i}`;
-                        btn.onclick = () => envoyerChoix(i.toString());
-                        choicesDiv.appendChild(btn);
-                    }
-                }
             }
             // Choix unique général
             else if (options.length > 0) {
