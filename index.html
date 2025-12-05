@@ -545,7 +545,21 @@ MÉTIER [N°] : **[Nom du métier]**
 • Relations : [préciser]
 
 ✨ **POURQUOI CE MÉTIER VOUS CORRESPOND** :
-[Analyse personnalisée 4-5 lignes liée au profil RIASEC, compétences Q7, motivations Q8-Q9]
+[Analyse personnalisée 4-5 lignes liée au profil d'intérêts (12 dimensions : MP, MT, ST, IN, AE, RS, AI, IC, AA, LS, RM, DC), compétences Q7, motivations Q8-Q9]
+
+**INTERDIT ABSOLU** : Ne JAMAIS mentionner "RIASEC" ni les codes R-I-A-S-E-C. Utiliser UNIQUEMENT les 12 dimensions du profil d'intérêts avec leurs noms complets :
+• MP (Mouvement & plein air)
+• MT (Manuel & Technique)
+• ST (Sciences & Technologies)
+• IN (Investigation & Information)
+• AE (Arts & Expressions)
+• RS (Relations & Sociabilité)
+• AI (Action & Initiative)
+• IC (Idées & Conception)
+• AA (Aide & Accompagnement)
+• LS (Leadership & Stratégie)
+• RM (Règles & Méthodes)
+• DC (Données & Chiffres)
 
 🎯 **ACCÈS ET FAISABILITÉ** :
 • Niveau : **[FORTE / MOYENNE / FAIBLE]**
@@ -674,6 +688,29 @@ Je suis en attente de ce document pour poursuivre."
 **Étape 2 : Contrôle qualité** (si problème, lister les problèmes et bloquer)
 
 **Étape 3 : Synthèse de profil**
+
+Générer une synthèse structurée en utilisant :
+• Les **12 dimensions du profil d'intérêts** avec leurs noms complets (MP, MT, ST, IN, AE, RS, AI, IC, AA, LS, RM, DC)
+• Les 3 dimensions dominantes
+• Le bilan de situation (Q1-Q15)
+• Les univers sélectionnés avec compatibilité
+
+**FORMAT OBLIGATOIRE pour la synthèse :**
+
+"═══════════════════════════════════════════════════════════════
+**SYNTHÈSE DE PROFIL** - [Prénom] ([Âge])
+═══════════════════════════════════════════════════════════════
+
+🎯 **VOS 3 DIMENSIONS D'INTÉRÊTS DOMINANTES** :
+1. **[Code]** ([Nom dimension]) – [Score]%
+2. **[Code]** ([Nom dimension]) – [Score]%
+3. **[Code]** ([Nom dimension]) – [Score]%
+
+→ **Profil général** : [Description 2-3 lignes basée sur ces 3 dimensions]
+
+[Reste de la synthèse...]"
+
+**INTERDIT ABSOLU** : Ne JAMAIS écrire "PROFIL RIASEC" ou "R (Réaliste)" ou tout autre code RIASEC.
 
 **Étape 4 : Validation**
 Terminer EXACTEMENT par : "[Prénom], souhaitez-vous compléter, corriger ou enrichir cette synthèse de votre profil ? **(OUI / NON)**"
@@ -832,6 +869,7 @@ INTERDICTIONS ABSOLUES
 13. Après Étape 12 : STOP COMPLET - rien d'autre
 14. TOUJOURS vouvoyer
 15. À l'Étape 11 : TOUJOURS vérifier quels univers ont été explorés et lesquels restent disponibles
+16. **Ne JAMAIS mentionner "RIASEC" ni les codes R-I-A-S-E-C** → Utiliser UNIQUEMENT les 12 dimensions : MP, MT, ST, IN, AE, RS, AI, IC, AA, LS, RM, DC avec leurs noms complets
 
 Tu dois être directif, structuré, suivre ce script à la lettre ET respecter la mise en forme obligatoire.`;
 
@@ -1044,12 +1082,30 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
 
             const options = extraireOptionsNumerotees(texte);
             
+            console.log('🔍 Détection boutons:', {
+                texteLength: texte.length,
+                optionsTrouvees: options.length,
+                extrait: texte.substring(texte.length - 300)
+            });
+            
             // Détecter message "Prenez le temps" → bouton Continuer
             if (texte.match(/Prenez le temps|Cliquez sur.*Continuer/i)) {
                 choicesDiv.innerHTML = `
                     <h4>Quand vous êtes prêt :</h4>
                     <button class="btn btn-secondary" onclick="envoyerChoix('Continuer')">▶️ Continuer</button>
                 `;
+            }
+            // Choix univers (PRIORITÉ HAUTE - AVANT OUI/NON)
+            else if (texte.match(/par quel univers|quel univers.*commencer|quel univers.*explorer|indiquez le.*numéro.*univers/i) && options.length > 0) {
+                console.log('✅ Type: Choix univers', options);
+                choicesDiv.innerHTML = '<h4>Choisissez un univers :</h4>';
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-choice large';
+                    btn.textContent = `${opt.numero}. ${opt.texte}`;
+                    btn.onclick = () => envoyerChoix(opt.numero.toString());
+                    choicesDiv.appendChild(btn);
+                });
             }
             // OUI / NON explicite
             else if (texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*|\(OUI\s*\/\s*NON\)|OUI\s+ou\s+NON/i)) {
