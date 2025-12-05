@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pass-Orientation - Assistant IA</title>
+    <title>Pass-Orientation - Assistant IA Contrôlé</title>
     <style>
         * {
             margin: 0;
@@ -89,7 +89,7 @@
         .input-group input:focus,
         .input-group textarea:focus {
             outline: none;
-            border-color: #0066CC;
+            border-color: #ff6f00;
         }
 
         .info {
@@ -99,15 +99,6 @@
             border-radius: 8px;
             margin: 10px 0;
             font-size: 14px;
-        }
-
-        .warning {
-            background: #fff3e0;
-            color: #e65100;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #ff9800;
-            margin: 15px 0;
         }
 
         .conversation-container {
@@ -139,7 +130,7 @@
         }
 
         .message.assistant {
-            background: #f3e5f5;
+            background: #fff3e0;
             border-left: 4px solid #ff6f00;
             margin-right: 50px;
         }
@@ -202,21 +193,104 @@
             box-shadow: 0 5px 20px rgba(255, 111, 0, 0.4);
         }
 
-        .btn-secondary {
-            background: #f5f5f5;
+        .btn-choice {
+            background: white;
             color: #333;
-            border: 2px solid #ddd;
+            border: 2px solid #ff6f00;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 8px;
+            display: inline-block;
+            min-width: 120px;
         }
 
-        .btn-secondary:hover:not(:disabled) {
-            background: #e0e0e0;
+        .btn-choice:hover {
+            background: #ff6f00;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
         }
 
-        .actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        .btn-choice.large {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin: 10px 0;
+        }
+
+        .choices-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
             margin-top: 20px;
+        }
+
+        .choices-container h4 {
+            color: #ff6f00;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .checkbox-group {
+            margin: 15px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #ff6f00;
+            background: #fff8f0;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 15px;
+        }
+
+        .validation-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            width: 100%;
+        }
+
+        .validation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .validation-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .error {
@@ -226,6 +300,27 @@
             border-radius: 10px;
             border-left: 4px solid #c62828;
             margin: 15px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff6f00;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .status {
@@ -257,25 +352,13 @@
             }
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ff6f00;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .counter {
+            background: #fff3e0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #e65100;
         }
     </style>
 </head>
@@ -283,7 +366,7 @@
     <div class="container">
         <div class="header">
             <h1>🎯 Pass-Orientation</h1>
-            <p>Assistant d'orientation professionnelle propulsé par Mistral AI</p>
+            <p>Assistant d'orientation professionnelle - Processus guidé</p>
         </div>
 
         <!-- Configuration -->
@@ -304,21 +387,21 @@
                 </div>
 
                 <div class="input-group">
-                    <label for="userData">📊 Données du jeu d'essai (copiez-collez ici)</label>
+                    <label for="userData">📊 Jeu d'essai (données complètes)</label>
                     <textarea 
                         id="userData" 
-                        placeholder="Collez ici le contenu complet de votre jeu d'essai :
+                        placeholder="Collez ici votre jeu d'essai complet :
 - Profil d'intérêts (12 dimensions)
-- Bilan de situation
+- Bilan de situation (toutes les questions)
 - Univers métiers sélectionnés"></textarea>
                 </div>
             </div>
 
-            <div class="actions">
+            <div style="display: flex; gap: 10px;">
                 <button class="btn btn-primary" id="btnStart" onclick="demarrerConversation()">
                     🚀 Démarrer Pass-Orientation
                 </button>
-                <button class="btn btn-secondary" onclick="reinitialiser()">
+                <button class="btn" style="background: #e0e0e0; color: #333;" onclick="reinitialiser()">
                     🔄 Réinitialiser
                 </button>
             </div>
@@ -328,7 +411,7 @@
         <div class="card">
             <div class="conversation-container" id="conversation">
                 <div class="info">
-                    👆 Configurez votre clé API Mistral et collez votre jeu d'essai, puis cliquez sur "Démarrer"
+                    👆 Configurez votre clé API et collez votre jeu d'essai, puis cliquez sur "Démarrer"
                 </div>
             </div>
         </div>
@@ -340,24 +423,107 @@
         // État de la conversation
         let conversationState = {
             historique: [],
-            etape: 'config', // config, code, donnees, synthese, validation, categorie, choix_univers, etc.
-            codeValide: false,
-            donnees: null,
-            synthese: null,
-            categorie: null,
-            universChoisi: null,
-            domainesChoisis: [],
-            metiersPresentes: [],
-            podium: []
+            etape: 'config',
+            enCours: false
         };
 
-        // Logo Mistral en SVG (orange)
+        // Logo Mistral SVG
         const MISTRAL_LOGO_SVG = `<svg class="mistral-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" fill="#ff6f00"/>
             <path d="M12 8v8M8 10l4-2 4 2M8 14l4 2 4-2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
         </svg>`;
 
-        // Afficher un statut temporaire
+        // Instructions système ultra-strictes
+        const INSTRUCTIONS_SYSTEME = `Tu es l'assistant Pass-Orientation, expert en orientation professionnelle.
+
+RÈGLES ABSOLUES DE COMPORTEMENT :
+
+1. SUIVRE LE PROCESSUS LINÉAIRE STRICT :
+   Étape 0 → Code
+   Étape 1 → Données
+   Étape 2 → Contrôle qualité
+   Étape 3 → Synthèse
+   Étape 4 → Validation
+   Étape 5 → Catégorie (interne, ne pas mentionner)
+   Étape 6 → Univers puis domaines
+   Étape 7-8 → Métiers
+   Étape 9 → Podium
+   Étape 10 → Parcours
+   Étape 11 → Synthèse
+   Étape 12 → Autre univers
+   Étape 13 → Clôture
+
+2. QUESTIONS FERMÉES UNIQUEMENT :
+   - "Souhaitez-vous..." → OUI ou NON
+   - "Par quel univers..." → Numéro uniquement
+   - "Sélectionnez 3 domaines" → 3 numéros uniquement
+   - "Quels métiers pour le podium" → 3 numéros uniquement
+
+3. FORMULATIONS EXACTES OBLIGATOIRES :
+
+Étape 0 :
+"Bonjour, je suis l'assistant virtuel « Pass-orientation ».
+Ce contenu est une création originale protégée par le droit d'auteur.
+Toute reproduction, imitation ou réutilisation non autorisée est interdite.
+
+Merci d'entrer le code confidentiel pour continuer."
+
+Si code = 197475 :
+"Accès autorisé. Bienvenue !"
+
+Étape 1 :
+"Pour commencer l'analyse de votre profil, merci de me transmettre le document contenant les 3 éléments suivants :
+• Votre profil d'intérêts (12 dimensions avec scores)
+• Votre bilan de situation complet (réponses aux questions)
+• Les univers métiers que vous avez sélectionnés (3 à 5 univers)
+
+Vous pouvez coller le contenu dans le chat.
+Je suis en attente de ce document pour poursuivre."
+
+Étape 4 :
+Terminer EXACTEMENT par : "[Prénom], souhaitez-vous compléter, corriger ou enrichir cette synthèse de votre profil ?"
+
+Étape 6 - Univers :
+"VOS UNIVERS SÉLECTIONNÉS (classés par compatibilité)
+[Liste numérotée]
+Par quel univers souhaitez-vous commencer votre exploration ?
+Merci d'indiquer le numéro de l'univers choisi."
+
+Étape 6 - Domaines :
+"UNIVERS : [Nom]
+Voici les domaines disponibles dans cet univers :
+[Liste numérotée avec descriptions]
+Vous devez sélectionner 3 domaines à explorer.
+Merci d'indiquer les numéros des domaines qui vous intéressent.
+Exemple : 2, 5, 7"
+
+Étape 8 :
+Terminer par : "Souhaitez-vous voir les métiers suivants ?"
+
+Étape 9 :
+"Parmi les métiers présentés, quels sont les 3 métiers que vous souhaitez retenir pour votre podium ?
+[Liste complète numérotée]
+Merci d'indiquer les 3 numéros correspondant à votre podium (exemple : 1, 3, 5)."
+
+Étape 10 :
+"Souhaitez-vous consulter les parcours pour les métiers de votre podium ?"
+
+4. INTERDICTIONS ABSOLUES :
+   - Ne JAMAIS poser de question ouverte
+   - Ne JAMAIS dire "que souhaitez-vous faire ?"
+   - Ne JAMAIS demander "avez-vous des questions ?"
+   - Ne JAMAIS improviser
+   - Ne JAMAIS sortir du processus
+   - TOUJOURS vouvoyer
+
+5. RÉPONSES ATTENDUES :
+   - L'utilisateur répondra UNIQUEMENT par : OUI, NON, ou des numéros
+   - Ne pas accepter de réponses narratives
+   - Si réponse invalide, redemander avec le même format
+
+Tu dois être directif, structuré et suivre le script à la lettre.`;
+
+        // Afficher statut
         function afficherStatut(message) {
             const status = document.getElementById('status');
             status.textContent = message;
@@ -365,7 +531,7 @@
             setTimeout(() => status.classList.remove('show'), 3000);
         }
 
-        // Ajouter un message dans la conversation
+        // Ajouter message
         function ajouterMessage(type, contenu) {
             const conversation = document.getElementById('conversation');
             const message = document.createElement('div');
@@ -384,7 +550,7 @@
             message.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
-        // Appeler l'API Mistral avec les instructions complètes
+        // Appeler Mistral
         async function appelMistral(promptUtilisateur) {
             const apiKey = document.getElementById('apiKey').value.trim();
             
@@ -392,39 +558,8 @@
                 throw new Error('Clé API Mistral manquante');
             }
 
-            // Instructions système complètes
-            const instructionsSysteme = `Tu es un expert en orientation scolaire, réorientation, bilan de compétences, matching métiers–profil–contrainte, et parcours de formation.
-
-Mission prioritaire : fournir des analyses et recommandations de haute qualité, précises, personnalisées et actionnables pour construire un projet professionnel clair, cohérent et réaliste.
-
-Tu vouvoies toujours ton interlocuteur.
-
-RÈGLES ABSOLUES :
-- Suivre scrupuleusement chaque étape dans l'ordre
-- Aucune initiative personnelle hors du processus
-- Neutralité stricte : pas de flatterie ou surinterprétation
-- Ne jamais parler de "mes données" : présenter les informations de manière directe
-- Utiliser "France Travail" (pas "Pôle emploi")
-
-PROCESSUS :
-1. Accès avec code 197475
-2. Récupération des données
-3. Contrôle qualité
-4. Synthèse de profil
-5. Validation/correction
-6. Détermination catégorie
-7. Choix univers et domaines
-8. Génération TOP 10 métiers
-9. Présentation 2 par 2
-10. Constitution podium
-11. Parcours formation
-12. Synthèse univers
-13. Autre univers ou clôture
-
-Tu es actuellement à l'étape appropriée selon le contexte de la conversation.`;
-
             const messages = [
-                { role: 'system', content: instructionsSysteme }
+                { role: 'system', content: INSTRUCTIONS_SYSTEME }
             ].concat(conversationState.historique).concat([
                 { role: 'user', content: promptUtilisateur }
             ]);
@@ -438,8 +573,8 @@ Tu es actuellement à l'étape appropriée selon le contexte de la conversation.
                 body: JSON.stringify({
                     model: 'mistral-large-latest',
                     messages: messages,
-                    temperature: 0.7,
-                    max_tokens: 2500
+                    temperature: 0.5,
+                    max_tokens: 3000
                 })
             });
 
@@ -451,7 +586,6 @@ Tu es actuellement à l'étape appropriée selon le contexte de la conversation.
             const data = await response.json();
             const reponse = data.choices[0].message.content;
 
-            // Ajouter à l'historique
             conversationState.historique.push(
                 { role: 'user', content: promptUtilisateur },
                 { role: 'assistant', content: reponse }
@@ -460,183 +594,219 @@ Tu es actuellement à l'étape appropriée selon le contexte de la conversation.
             return reponse;
         }
 
-        // Démarrer la conversation
+        // Démarrer
         async function demarrerConversation() {
+            if (conversationState.enCours) return;
+            
             try {
+                conversationState.enCours = true;
                 const userData = document.getElementById('userData').value.trim();
                 
-                // Réinitialiser
                 document.getElementById('conversation').innerHTML = '';
                 conversationState.historique = [];
-                conversationState.etape = 'demarre';
 
-                // Désactiver le bouton
                 const btnStart = document.getElementById('btnStart');
                 btnStart.disabled = true;
-                btnStart.innerHTML = '⏳ Démarrage en cours...';
+                btnStart.innerHTML = '⏳ En cours...';
 
-                // ÉTAPE 0 : Accès avec code
-                const promptInitial = `Bonjour, je souhaite utiliser Pass-Orientation.
-
-ÉTAPE 0 - ACCÈS AVEC CODE :
-Affiche exactement le message d'accueil suivant :
-
-"Bonjour, je suis l'assistant virtuel « Pass-orientation ».
-Ce contenu est une création originale protégée par le droit d'auteur.
-Toute reproduction, imitation ou réutilisation non autorisée est interdite.
-
-Merci d'entrer le code confidentiel pour continuer."
-
-Attends que je te donne le code.`;
-
-                const reponseAccueil = await appelMistral(promptInitial);
+                // Étape 0
+                const reponseAccueil = await appelMistral('Démarrer Pass-Orientation');
                 ajouterMessage('assistant', reponseAccueil);
 
                 // Automatiquement envoyer le code
                 setTimeout(async () => {
                     ajouterMessage('user', '197475');
-                    
                     const reponseCode = await appelMistral('197475');
                     ajouterMessage('assistant', reponseCode);
 
-                    // Si données fournies, les envoyer automatiquement
+                    // Si données, les envoyer
                     if (userData) {
                         setTimeout(async () => {
-                            ajouterMessage('user', `Voici mes données complètes :\n\n${userData}`);
-                            
-                            const reponseDonnees = await appelMistral(`Voici mes données complètes :\n\n${userData}`);
+                            ajouterMessage('user', `Voici mes données :\n\n${userData}`);
+                            const reponseDonnees = await appelMistral(`Voici mes données :\n\n${userData}`);
                             ajouterMessage('assistant', reponseDonnees);
                             
-                            afficherStatut('✅ Données transmises à Mistral');
-                            activerInteractionContinue();
+                            genererBoutons(reponseDonnees);
                         }, 1500);
                     } else {
-                        afficherStatut('✅ Code accepté - En attente de vos données');
-                        activerInteractionContinue();
+                        genererBoutons(reponseCode);
                     }
                 }, 1500);
 
-                afficherStatut('✅ Conversation démarrée');
-
             } catch (error) {
                 console.error('Erreur:', error);
-                document.getElementById('conversation').innerHTML += `
-                    <div class="error">
-                        ❌ Erreur : ${error.message}<br><br>
-                        Vérifiez votre clé API Mistral et votre connexion internet.
-                    </div>
-                `;
+                ajouterMessage('assistant', `❌ Erreur : ${error.message}`);
             } finally {
                 const btnStart = document.getElementById('btnStart');
                 btnStart.disabled = false;
                 btnStart.innerHTML = '🚀 Démarrer Pass-Orientation';
+                conversationState.enCours = false;
             }
         }
 
-        // Activer l'interaction continue (zone de saisie)
-        function activerInteractionContinue() {
+        // Générer boutons selon la réponse
+        function genererBoutons(texte) {
             const conversation = document.getElementById('conversation');
             
-            // Supprimer l'ancienne zone si elle existe
-            const existingInput = document.getElementById('userInputZone');
-            if (existingInput) existingInput.remove();
-            
-            const inputZone = document.createElement('div');
-            inputZone.id = 'userInputZone';
-            inputZone.style.marginTop = '20px';
-            inputZone.innerHTML = `
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">
-                        💬 Votre réponse :
-                    </label>
-                    <textarea 
-                        id="userInput" 
-                        style="width: 100%; min-height: 100px; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"
-                        placeholder="Tapez votre réponse ici..."></textarea>
-                    <div style="margin-top: 10px;">
-                        <button class="btn btn-primary" onclick="envoyerReponse()">
-                            📤 Envoyer
-                        </button>
-                    </div>
-                </div>
-            `;
-            conversation.appendChild(inputZone);
-            
-            document.getElementById('userInput').focus();
-        }
+            // Supprimer anciens boutons
+            const oldChoices = document.getElementById('choicesZone');
+            if (oldChoices) oldChoices.remove();
 
-        // Envoyer une réponse utilisateur
-        async function envoyerReponse() {
-            const input = document.getElementById('userInput');
-            const texte = input.value.trim();
-            
-            if (!texte) {
-                alert('Veuillez entrer une réponse');
+            const choicesDiv = document.createElement('div');
+            choicesDiv.id = 'choicesZone';
+            choicesDiv.className = 'choices-container';
+
+            // Détecter type de question
+            if (texte.match(/souhaitez-vous|confirmez-vous/i)) {
+                // Boutons OUI/NON
+                choicesDiv.innerHTML = `
+                    <h4>Votre réponse :</h4>
+                    <button class="btn-choice" onclick="envoyerChoix('OUI')">✅ OUI</button>
+                    <button class="btn-choice" onclick="envoyerChoix('NON')">❌ NON</button>
+                `;
+            }
+            else if (texte.match(/par quel univers|quel métier|pour quel métier/i)) {
+                // Extraire options numérotées
+                const options = extraireOptionsNumerotees(texte);
+                if (options.length > 0) {
+                    choicesDiv.innerHTML = '<h4>Choisissez une option :</h4>';
+                    options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-choice large';
+                        btn.textContent = `${opt.numero}. ${opt.texte}`;
+                        btn.onclick = () => envoyerChoix(opt.numero.toString());
+                        choicesDiv.appendChild(btn);
+                    });
+                }
+            }
+            else if (texte.match(/sélectionnez 3 domaines|3 métiers pour votre podium/i)) {
+                // Checkboxes
+                const options = extraireOptionsNumerotees(texte);
+                const nbChoix = 3;
+                if (options.length > 0) {
+                    choicesDiv.innerHTML = `<h4>Sélectionnez exactement ${nbChoix} choix :</h4>
+                                           <div class="counter" id="counter">0 / ${nbChoix} sélectionné(s)</div>
+                                           <div class="checkbox-group" id="checkboxGroup"></div>`;
+                    
+                    const checkboxGroup = choicesDiv.querySelector('#checkboxGroup');
+                    options.forEach(opt => {
+                        const div = document.createElement('div');
+                        div.className = 'checkbox-item';
+                        div.innerHTML = `
+                            <input type="checkbox" id="cb${opt.numero}" value="${opt.numero}" onchange="updateCounter(${nbChoix})">
+                            <label for="cb${opt.numero}">${opt.numero}. ${opt.texte}</label>
+                        `;
+                        checkboxGroup.appendChild(div);
+                    });
+                    
+                    const btnValidate = document.createElement('button');
+                    btnValidate.className = 'validation-btn';
+                    btnValidate.id = 'validateBtn';
+                    btnValidate.disabled = true;
+                    btnValidate.textContent = `Valider mes ${nbChoix} choix`;
+                    btnValidate.onclick = () => envoyerSelectionMultiple(nbChoix);
+                    choicesDiv.appendChild(btnValidate);
+                }
+            }
+            else if (texte.includes('Merci d\'entrer le code')) {
+                // Champ code (déjà géré automatiquement)
+                return;
+            }
+            else {
+                // Pas de choix = fin ou attente
                 return;
             }
 
-            // Afficher le message utilisateur
-            ajouterMessage('user', texte);
-            input.value = '';
+            conversation.appendChild(choicesDiv);
+        }
 
-            // Afficher loading
-            const conversation = document.getElementById('conversation');
-            const loading = document.createElement('div');
-            loading.className = 'loading';
-            loading.id = 'loadingIndicator';
-            loading.innerHTML = '<div class="spinner"></div><p>Mistral réfléchit...</p>';
-            conversation.appendChild(loading);
+        // Extraire options numérotées
+        function extraireOptionsNumerotees(texte) {
+            const regex = /(\d+)[.)]\s*([^\n]+)/g;
+            const options = [];
+            let match;
+            while ((match = regex.exec(texte)) !== null) {
+                options.push({
+                    numero: parseInt(match[1]),
+                    texte: match[2].trim()
+                });
+            }
+            return options;
+        }
+
+        // Update counter
+        function updateCounter(max) {
+            const checkboxes = document.querySelectorAll('#checkboxGroup input[type="checkbox"]:checked');
+            const count = checkboxes.length;
+            document.getElementById('counter').textContent = `${count} / ${max} sélectionné(s)`;
+            document.getElementById('validateBtn').disabled = (count !== max);
+        }
+
+        // Envoyer choix simple
+        async function envoyerChoix(valeur) {
+            if (conversationState.enCours) return;
+            conversationState.enCours = true;
 
             try {
+                // Supprimer boutons
+                document.getElementById('choicesZone')?.remove();
+
+                // Afficher choix utilisateur
+                ajouterMessage('user', valeur);
+
+                // Loading
+                const conversation = document.getElementById('conversation');
+                const loading = document.createElement('div');
+                loading.className = 'loading';
+                loading.id = 'loadingIndicator';
+                loading.innerHTML = '<div class="spinner"></div><p>Mistral analyse...</p>';
+                conversation.appendChild(loading);
+
                 // Appeler Mistral
-                const reponse = await appelMistral(texte);
+                const reponse = await appelMistral(valeur);
                 
-                // Retirer loading
                 document.getElementById('loadingIndicator')?.remove();
-                
-                // Afficher réponse
                 ajouterMessage('assistant', reponse);
                 
-                // Réactiver la zone d'input
-                activerInteractionContinue();
-                
+                // Générer nouveaux boutons
+                genererBoutons(reponse);
+
             } catch (error) {
                 document.getElementById('loadingIndicator')?.remove();
                 ajouterMessage('assistant', `❌ Erreur : ${error.message}`);
-                activerInteractionContinue();
+            } finally {
+                conversationState.enCours = false;
             }
         }
 
-        // Permettre l'envoi avec Entrée (Shift+Entrée pour nouvelle ligne)
-        document.addEventListener('keydown', function(e) {
-            const input = document.getElementById('userInput');
-            if (input && e.target === input && e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                envoyerReponse();
+        // Envoyer sélection multiple
+        async function envoyerSelectionMultiple(nb) {
+            const checkboxes = document.querySelectorAll('#checkboxGroup input[type="checkbox"]:checked');
+            if (checkboxes.length !== nb) {
+                alert(`Vous devez sélectionner exactement ${nb} choix`);
+                return;
             }
-        });
+
+            const valeurs = Array.from(checkboxes).map(cb => cb.value);
+            const texte = valeurs.join(', ');
+            
+            await envoyerChoix(texte);
+        }
 
         // Réinitialiser
         function reinitialiser() {
-            if (confirm('Voulez-vous recommencer la conversation ?')) {
+            if (confirm('Voulez-vous recommencer ?')) {
                 conversationState = {
                     historique: [],
                     etape: 'config',
-                    codeValide: false,
-                    donnees: null,
-                    synthese: null,
-                    categorie: null,
-                    universChoisi: null,
-                    domainesChoisis: [],
-                    metiersPresentes: [],
-                    podium: []
+                    enCours: false
                 };
                 document.getElementById('conversation').innerHTML = `
                     <div class="info">
-                        👆 Configurez votre clé API Mistral et collez votre jeu d'essai, puis cliquez sur "Démarrer"
+                        👆 Configurez votre clé API et collez votre jeu d'essai, puis cliquez sur "Démarrer"
                     </div>
                 `;
-                afficherStatut('🔄 Conversation réinitialisée');
+                afficherStatut('🔄 Réinitialisé');
             }
         }
     </script>
