@@ -657,22 +657,24 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
             choicesDiv.className = 'choices-container';
 
             // ═══════════════════════════════════════════════════════════
-            // DÉTECTION INTELLIGENTE DU TYPE DE RÉPONSE ATTENDUE
+            // DÉTECTION BASÉE SUR LES INSTRUCTIONS PASS-ORIENTATION
             // ═══════════════════════════════════════════════════════════
             
-            // Extraire d'abord les options numérotées (si présentes)
             const options = extraireOptionsNumerotees(texte);
             
-            // Debug : afficher le type détecté
             console.log('🔍 Détection:', {
                 texteLength: texte.length,
                 optionsTrouvees: options.length,
-                options: options
+                derniereLigne: texte.substring(texte.length - 300)
             });
             
-            // TYPE 1 : Questions OUI/NON
-            if (texte.match(/souhaitez-vous|confirmez-vous|voulez-vous/i) && options.length === 0) {
-                console.log('✅ Type détecté: OUI/NON');
+            // ─────────────────────────────────────────────────────────
+            // TYPE 1 : OUI/NON explicite
+            // ─────────────────────────────────────────────────────────
+            // Étape 4, 8, 10, 11, 12 : Questions avec (OUI / NON)
+            
+            if (texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*|\(OUI\s*\/\s*NON\)|OUI\s+ou\s+NON/i)) {
+                console.log('✅ Type: OUI/NON (mention explicite)');
                 choicesDiv.innerHTML = `
                     <h4>Votre réponse :</h4>
                     <button class="btn-choice" onclick="envoyerChoix('OUI')">✅ OUI</button>
@@ -680,16 +682,35 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                 `;
             }
             
-            // TYPE 2 : Sélection multiple (3 choix parmi liste)
-            else if (texte.match(/sélectionnez\s+(\d+)\s+(domaines|métiers)|(\d+)\s+(métiers|domaines)\s+pour/i)) {
-                const matchNombre = texte.match(/sélectionnez\s+(\d+)|(\d+)\s+(métiers|domaines)\s+pour/i);
-                const nbChoix = matchNombre ? parseInt(matchNombre[1] || matchNombre[2]) : 3;
-                
-                console.log(`✅ Type détecté: Sélection multiple (${nbChoix} choix)`);
+            // ─────────────────────────────────────────────────────────
+            // TYPE 2 : Questions de confirmation sans liste
+            // ─────────────────────────────────────────────────────────
+            // "Souhaitez-vous..." + pas de liste numérotée
+            
+            else if (texte.match(/souhaitez-vous|confirmez-vous|voulez-vous/i) && 
+                     options.length === 0) {
+                console.log('✅ Type: OUI/NON (question confirmation)');
+                choicesDiv.innerHTML = `
+                    <h4>Votre réponse :</h4>
+                    <button class="btn-choice" onclick="envoyerChoix('OUI')">✅ OUI</button>
+                    <button class="btn-choice" onclick="envoyerChoix('NON')">❌ NON</button>
+                `;
+            }
+            
+            // ─────────────────────────────────────────────────────────
+            // TYPE 3 : Sélection de 3 éléments (domaines ou métiers podium)
+            // ─────────────────────────────────────────────────────────
+            // Étape 6.2 : "Vous devez sélectionner 3 domaines"
+            // Étape 9.2 : "quels sont les 3 métiers... pour votre podium"
+            
+            else if (texte.match(/sélectionnez?\s+3\s+(domaines|métiers)|3\s+métiers.*podium|Vous devez sélectionner 3/i)) {
+                const nbChoix = 3;
+                console.log(`✅ Type: Sélection multiple (${nbChoix} choix)`);
                 
                 if (options.length > 0) {
                     choicesDiv.innerHTML = `
                         <h4>Sélectionnez exactement ${nbChoix} choix :</h4>
+                        <div class="info">Indiquez les numéros séparés par des virgules (ex: 1, 3, 5)</div>
                         <div class="counter" id="counter">0 / ${nbChoix} sélectionné(s)</div>
                         <div class="checkbox-group" id="checkboxGroup"></div>
                     `;
@@ -715,15 +736,16 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                 }
             }
             
-            // TYPE 3 : Choix unique dans une liste (détection large)
-            else if (options.length > 0) {
-                // Si on a des options numérotées et que ce n'est ni OUI/NON ni sélection multiple
-                // → C'est un choix unique dans la liste
+            // ─────────────────────────────────────────────────────────
+            // TYPE 4 : Choix unique - Univers
+            // ─────────────────────────────────────────────────────────
+            // Étape 6.1 : "Par quel univers souhaitez-vous commencer"
+            
+            else if (texte.match(/par quel univers|quel univers.*commencer|indiquez le numéro de l'univers/i) && 
+                     options.length > 0) {
+                console.log(`✅ Type: Choix univers (${options.length} options)`);
                 
-                console.log(`✅ Type détecté: Choix unique (${options.length} options)`);
-                
-                choicesDiv.innerHTML = '<h4>Choisissez une option :</h4>';
-                
+                choicesDiv.innerHTML = '<h4>Choisissez un univers :</h4>';
                 options.forEach(opt => {
                     const btn = document.createElement('button');
                     btn.className = 'btn-choice large';
@@ -733,15 +755,72 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                 });
             }
             
-            // TYPE 4 : Code d'accès (déjà géré automatiquement)
-            else if (texte.includes('Merci d\'entrer le code') || texte.includes('code confidentiel')) {
-                console.log('✅ Type détecté: Code d\'accès (géré automatiquement)');
-                return;
+            // ─────────────────────────────────────────────────────────
+            // TYPE 5 : Choix unique - Métier du podium pour parcours
+            // ─────────────────────────────────────────────────────────
+            // Étape 10.2 : "Pour quel métier souhaitez-vous consulter le parcours ?"
+            // Attend : 1, 2 ou 3
+            
+            else if (texte.match(/pour quel métier.*parcours|métier.*consulter.*parcours|indiquez.*1.*2.*3/i) &&
+                     (options.length === 3 || texte.match(/1.*2.*3/))) {
+                console.log('✅ Type: Choix métier podium (1, 2 ou 3)');
+                
+                choicesDiv.innerHTML = '<h4>Choisissez un métier :</h4>';
+                
+                // Si options détectées, les utiliser
+                if (options.length > 0) {
+                    options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-choice large';
+                        btn.textContent = `${opt.numero}. ${opt.texte}`;
+                        btn.onclick = () => envoyerChoix(opt.numero.toString());
+                        choicesDiv.appendChild(btn);
+                    });
+                } else {
+                    // Sinon, proposer 1, 2, 3 générique
+                    for (let i = 1; i <= 3; i++) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-choice';
+                        btn.textContent = `${i}`;
+                        btn.onclick = () => envoyerChoix(i.toString());
+                        choicesDiv.appendChild(btn);
+                    }
+                }
             }
             
-            // TYPE 5 : Pas de choix attendu
+            // ─────────────────────────────────────────────────────────
+            // TYPE 6 : Choix unique général (liste numérotée)
+            // ─────────────────────────────────────────────────────────
+            // Pour toute autre liste numérotée
+            
+            else if (options.length > 0) {
+                console.log(`✅ Type: Choix unique (${options.length} options)`);
+                
+                choicesDiv.innerHTML = '<h4>Choisissez une option :</h4>';
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-choice large';
+                    btn.textContent = `${opt.numero}. ${opt.texte}`;
+                    btn.onclick = () => envoyerChoix(opt.numero.toString());
+                    choicesDiv.appendChild(btn);
+                });
+            }
+            
+            // ─────────────────────────────────────────────────────────
+            // TYPE 7 : Code d'accès (géré automatiquement)
+            // ─────────────────────────────────────────────────────────
+            
+            else if (texte.includes('code confidentiel') || texte.includes('197475')) {
+                console.log('✅ Type: Code d\'accès (auto-géré)');
+                return; // Géré automatiquement
+            }
+            
+            // ─────────────────────────────────────────────────────────
+            // TYPE 8 : Message informatif (pas de choix)
+            // ─────────────────────────────────────────────────────────
+            
             else {
-                console.log('ℹ️ Type détecté: Message informatif (pas de boutons)');
+                console.log('ℹ️ Type: Message informatif (pas de boutons)');
                 return;
             }
 
