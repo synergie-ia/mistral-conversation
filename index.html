@@ -958,8 +958,9 @@ MISE EN FORME OBLIGATOIRE
                 btnValidate.onclick = () => envoyerSelectionMultiple(3);
                 choicesDiv.appendChild(btnValidate);
             }
-            // PRIORITÉ 4 : Choix 2 métiers prioritaires (checkboxes)
-            else if (texte.match(/indiquez\s+2\s+numéros|Plan\s+A.*Plan\s+B|2\s+métiers.*prioritaires/i)) {
+            // PRIORITÉ 4 : Choix 2 métiers prioritaires (checkboxes) - DOIT ÊTRE AVANT OUI/NON
+            else if (texte.match(/VOS 2 MÉTIERS PRIORITAIRES|indiquez\s+2\s+numéros|Plan\s+A.*Plan\s+B/i) && 
+                     !texte.match(/parcours.*formation.*\*\*\(OUI\s*\/\s*NON\)\*\*/i)) {
                 choicesDiv.innerHTML = `
                     <h4>Sélectionnez exactement 2 métiers :</h4>
                     <div class="info">Cochez 2 cases ci-dessous, puis validez.</div>
@@ -986,7 +987,7 @@ MISE EN FORME OBLIGATOIRE
                 btnValidate.onclick = () => envoyerSelectionMultiple(2);
                 choicesDiv.appendChild(btnValidate);
             }
-            // PRIORITÉ 5 : OUI/NON explicite
+            // PRIORITÉ 5 : OUI/NON explicite avec ** (OUI / NON) **
             else if (texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*/i)) {
                 choicesDiv.innerHTML = `
                     <h4>Votre réponse :</h4>
@@ -994,8 +995,10 @@ MISE EN FORME OBLIGATOIRE
                     <button class="btn-choice" onclick="envoyerChoix(&quot;NON&quot;)">❌ NON</button>
                 `;
             }
-            // PRIORITÉ 6 : Questions avec OUI/NON implicite
-            else if (texte.match(/souhaitez-vous|voulez-vous|confirmez-vous/i) && options.length === 0) {
+            // PRIORITÉ 6 : Questions avec OUI/NON implicite (uniquement si pas de ** (OUI / NON) ** et pas d'options numérotées)
+            else if (texte.match(/souhaitez-vous|voulez-vous|confirmez-vous/i) && 
+                     options.length === 0 && 
+                     !texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*/i)) {
                 choicesDiv.innerHTML = `
                     <h4>Votre réponse :</h4>
                     <button class="btn-choice" onclick="envoyerChoix(&quot;OUI&quot;)">✅ OUI</button>
