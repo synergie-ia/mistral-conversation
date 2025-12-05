@@ -295,36 +295,6 @@
             cursor: not-allowed;
         }
 
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #c62828;
-            margin: 15px 0;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ff6f00;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .status {
             position: fixed;
             bottom: 20px;
@@ -362,6 +332,38 @@
             font-size: 13px;
             color: #e65100;
         }
+
+        /* Barre de progression (barre + %) */
+        .progress-wrapper {
+            margin-top: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar-inner {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff6f00, #ffb300);
+            border-radius: 999px;
+            transition: width 0.08s linear;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #bf360c;
+            font-weight: 600;
+        }
+
+        .progress-finished .progress-text {
+            color: #2e7d32;
+        }
     </style>
 </head>
 <body>
@@ -393,12 +395,13 @@
                     <textarea 
                         id="userData" 
                         placeholder="Collez ici votre jeu d'essai complet :
-- Profil d'intérêts (12 dimensions)
+
+- Profil d’intérêts (12 dimensions)
 - Bilan de situation (toutes les questions)
 - Univers métiers sélectionnés"></textarea>
                 </div>
             </div>
-
+            
             <div style="display: flex; gap: 10px;">
                 <button class="btn btn-primary" id="btnStart" onclick="demarrerConversation()">
                     🚀 Démarrer Pass-Orientation
@@ -408,7 +411,7 @@
                 </button>
             </div>
         </div>
-
+    
         <!-- Zone de conversation -->
         <div class="card">
             <div class="conversation-container" id="conversation">
@@ -422,7 +425,7 @@
     <div class="status" id="status"></div>
 
     <script>
-        // État de la conversation
+        // État de la conversation (stocké côté navigateur)
         let conversationState = {
             historique: [],
             etape: 'config',
@@ -435,7 +438,7 @@
             <path d="M12 8v8M8 10l4-2 4 2M8 14l4 2 4-2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
         </svg>`;
 
-        // Instructions système ultra-strictes
+        // Instructions système ultra-strictes (version proche de la tienne, avec ajout sur les domaines)
         const INSTRUCTIONS_SYSTEME = `Tu es l'assistant Pass-Orientation, expert en orientation professionnelle.
 
 RÈGLES ABSOLUES DE COMPORTEMENT :
@@ -456,76 +459,79 @@ RÈGLES ABSOLUES DE COMPORTEMENT :
    Étape 13 → Clôture
 
 2. QUESTIONS FERMÉES UNIQUEMENT :
-   - "Souhaitez-vous..." → OUI ou NON
-   - "Par quel univers..." → Numéro uniquement
-   - "Sélectionnez 3 domaines" → 3 numéros uniquement
-   - "Quels métiers pour le podium" → 3 numéros uniquement
+- “Souhaitez-vous…” → OUI ou NON
+- “Par quel univers…” → Numéro uniquement
+- “Sélectionnez 3 domaines” → 3 numéros uniquement
+- “Quels métiers pour le podium” → 3 numéros uniquement
 
 3. FORMULATIONS EXACTES OBLIGATOIRES :
 
 Étape 0 :
-"Bonjour, je suis l'assistant virtuel « Pass-orientation ».
-Ce contenu est une création originale protégée par le droit d'auteur.
+“Bonjour, je suis l’assistant virtuel « Pass-orientation ».
+Ce contenu est une création originale protégée par le droit d’auteur.
 Toute reproduction, imitation ou réutilisation non autorisée est interdite.
 
-Merci d'entrer le code confidentiel pour continuer."
+Merci d’entrer le code confidentiel pour continuer.”
 
 Si code = 197475 :
-"Accès autorisé. Bienvenue !"
+“Accès autorisé. Bienvenue !”
 
 Étape 1 :
-"Pour commencer l'analyse de votre profil, merci de me transmettre le document contenant les 3 éléments suivants :
-• Votre profil d'intérêts (12 dimensions avec scores)
+“Pour commencer l’analyse de votre profil, merci de me transmettre le document contenant les 3 éléments suivants :
+• Votre profil d’intérêts (12 dimensions avec scores)
 • Votre bilan de situation complet (réponses aux questions)
 • Les univers métiers que vous avez sélectionnés (3 à 5 univers)
 
 Vous pouvez coller le contenu dans le chat.
-Je suis en attente de ce document pour poursuivre."
+Je suis en attente de ce document pour poursuivre.”
 
 Étape 4 :
-Terminer EXACTEMENT par : "[Prénom], souhaitez-vous compléter, corriger ou enrichir cette synthèse de votre profil ?"
+Terminer EXACTEMENT par : “[Prénom], souhaitez-vous compléter, corriger ou enrichir cette synthèse de votre profil ?”
 
 Étape 6 - Univers :
-"VOS UNIVERS SÉLECTIONNÉS (classés par compatibilité)
+“VOS UNIVERS SÉLECTIONNÉS (classés par compatibilité)
 [Liste numérotée]
 Par quel univers souhaitez-vous commencer votre exploration ?
-Merci d'indiquer le numéro de l'univers choisi."
+Merci d’indiquer le numéro de l’univers choisi.”
 
 Étape 6 - Domaines :
-"UNIVERS : [Nom]
+– Pour chaque univers choisi, tu dois générer toi-même entre 6 et 8 domaines professionnels spécifiques à cet univers, adaptés au profil de la personne (intérêts, bilan de situation, contraintes). 
+– Les domaines doivent être clairs, professionnels et présentés dans une liste numérotée.
+
+“UNIVERS : [Nom]
 Voici les domaines disponibles dans cet univers :
 [Liste numérotée avec descriptions]
 Vous devez sélectionner 3 domaines à explorer.
-Merci d'indiquer les numéros des domaines qui vous intéressent.
-Exemple : 2, 5, 7"
+Merci d’indiquer les numéros des domaines qui vous intéressent.
+Exemple : 2, 5, 7”
 
 Étape 8 :
-Terminer par : "Souhaitez-vous voir les métiers suivants ?"
+Terminer par : “Souhaitez-vous voir les métiers suivants ?”
 
 Étape 9 :
-"Parmi les métiers présentés, quels sont les 3 métiers que vous souhaitez retenir pour votre podium ?
+“Parmi les métiers présentés, quels sont les 3 métiers que vous souhaitez retenir pour votre podium ?
 [Liste complète numérotée]
-Merci d'indiquer les 3 numéros correspondant à votre podium (exemple : 1, 3, 5)."
+Merci d’indiquer les 3 numéros correspondant à votre podium (exemple : 1, 3, 5).”
 
 Étape 10 :
-"Souhaitez-vous consulter les parcours pour les métiers de votre podium ?"
+“Souhaitez-vous consulter les parcours pour les métiers de votre podium ?”
 
 4. INTERDICTIONS ABSOLUES :
-   - Ne JAMAIS poser de question ouverte
-   - Ne JAMAIS dire "que souhaitez-vous faire ?"
-   - Ne JAMAIS demander "avez-vous des questions ?"
-   - Ne JAMAIS improviser
-   - Ne JAMAIS sortir du processus
-   - TOUJOURS vouvoyer
+- Ne JAMAIS poser de question ouverte
+- Ne JAMAIS dire “que souhaitez-vous faire ?”
+- Ne JAMAIS demander “avez-vous des questions ?”
+- Ne JAMAIS improviser
+- Ne JAMAIS sortir du processus
+- TOUJOURS vouvoyer
 
 5. RÉPONSES ATTENDUES :
-   - L'utilisateur répondra UNIQUEMENT par : OUI, NON, ou des numéros
-   - Ne pas accepter de réponses narratives
-   - Si réponse invalide, redemander avec le même format
+- L’utilisateur répondra UNIQUEMENT par : OUI, NON, ou des numéros
+- Ne pas accepter de réponses narratives
+- Si réponse invalide, redemander avec le même format
 
-Tu dois être directif, structuré et suivre le script à la lettre.`;
+Tu dois être directif, structuré et suivre ce script à la lettre.`;
 
-        // Afficher statut
+        // Afficher un statut court en bas à droite
         function afficherStatut(message) {
             const status = document.getElementById('status');
             status.textContent = message;
@@ -533,15 +539,15 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
             setTimeout(() => status.classList.remove('show'), 3000);
         }
 
-        // Ajouter message
+        // Ajouter un message complet (sans streaming)
         function ajouterMessage(type, contenu) {
             const conversation = document.getElementById('conversation');
             const message = document.createElement('div');
             message.className = `message ${type}`;
             
-            const labelContent = type === 'user' ? 
-                '👤 Vous' : 
-                `${MISTRAL_LOGO_SVG} <span>Mistral AI - Pass-Orientation</span>`;
+            const labelContent = type === 'user' 
+                ? '👤 Vous' 
+                : `${MISTRAL_LOGO_SVG} <span>Mistral AI - Pass-Orientation</span>`;
             
             message.innerHTML = `
                 <div class="label">${labelContent}</div>
@@ -552,51 +558,133 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
             message.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
-        // Appeler Mistral
+        // Appel Mistral en STREAMING (SSE) + barre de progression + anti-flicker
         async function appelMistral(promptUtilisateur) {
-            const apiKey = document.getElementById('apiKey').value.trim();
-            
-            if (!apiKey) {
-                throw new Error('Clé API Mistral manquante');
-            }
+            const apiKey = document.getElementById("apiKey").value.trim();
+            if (!apiKey) throw new Error("Clé API Mistral manquante");
 
+            // On garde tout l'historique pour les tests (version "full contexte")
             const messages = [
-                { role: 'system', content: INSTRUCTIONS_SYSTEME }
-            ].concat(conversationState.historique).concat([
-                { role: 'user', content: promptUtilisateur }
-            ]);
+                { role: "system", content: INSTRUCTIONS_SYSTEME },
+                ...conversationState.historique,
+                { role: "user", content: promptUtilisateur }
+            ];
 
-            const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
-                method: 'POST',
+            // Création de la bulle assistant avec barre de progression
+            const conversation = document.getElementById("conversation");
+            const message = document.createElement("div");
+            message.className = "message assistant";
+            message.innerHTML = `
+                <div class="label">${MISTRAL_LOGO_SVG} <span>Mistral AI - Pass-Orientation</span></div>
+                <div class="content"></div>
+                <div class="progress-wrapper">
+                    <div class="progress-bar">
+                        <div class="progress-bar-inner"></div>
+                    </div>
+                    <div class="progress-text">⏳ 0%</div>
+                </div>
+            `;
+            conversation.appendChild(message);
+            message.scrollIntoView({ behavior: "smooth", block: "end" });
+
+            const contentDiv = message.querySelector(".content");
+            const progressWrapper = message.querySelector(".progress-wrapper");
+            const progressBarInner = message.querySelector(".progress-bar-inner");
+            const progressText = message.querySelector(".progress-text");
+
+            // Appel API Mistral
+            const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+                method: "POST",
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    model: 'mistral-large-latest',
-                    messages: messages,
+                    model: "mistral-large-latest",
+                    messages,
                     temperature: 0.5,
-                    max_tokens: 3000
+                    max_tokens: 3000,
+                    stream: true
                 })
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || `Erreur HTTP ${response.status}`);
+                throw new Error(`Erreur HTTP ${response.status}`);
             }
 
-            const data = await response.json();
-            const reponse = data.choices[0].message.content;
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
 
+            let fullText = "";
+            let buffer = "";
+            let lastUpdate = 0;
+            let progress = 0;
+
+            // Mise à jour DOM limitée (anti-flicker)
+            function updateDOM(force = false) {
+                const now = performance.now();
+                if (force || now - lastUpdate > 40) { // ~25 FPS
+                    contentDiv.textContent = fullText;
+                    message.scrollIntoView({ behavior: "smooth", block: "end" });
+                    lastUpdate = now;
+
+                    progressBarInner.style.width = `${progress}%`;
+                    progressText.textContent = progress < 100 
+                        ? `⏳ ${Math.round(progress)}%`
+                        : `✔️ 100%`;
+                }
+            }
+
+            // Lecture SSE
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop(); // on garde le fragment incomplet
+
+                for (const line of lines) {
+                    if (!line.startsWith("data: ")) continue;
+                    const jsonStr = line.replace("data: ", "").trim();
+                    if (!jsonStr || jsonStr === "[DONE]") continue;
+
+                    try {
+                        const data = JSON.parse(jsonStr);
+                        const delta = data.choices?.[0]?.delta?.content;
+                        if (delta) {
+                            fullText += delta;
+                            // progression "douce" plafonnée avant la fin
+                            progress = Math.min(progress + 2, 90);
+                            updateDOM();
+                        }
+                    } catch (e) {
+                        console.warn("Chunk ignoré :", jsonStr);
+                    }
+                }
+            }
+
+            // Mise à jour finale
+            progress = 100;
+            updateDOM(true);
+            progressWrapper.classList.add("progress-finished");
+
+            // Option : faire disparaître la barre après un petit délai
+            setTimeout(() => {
+                progressWrapper.style.opacity = "0";
+                progressWrapper.style.transition = "opacity 0.4s ease-out";
+            }, 800);
+
+            // Historique complet pour le prochain tour
             conversationState.historique.push(
-                { role: 'user', content: promptUtilisateur },
-                { role: 'assistant', content: reponse }
+                { role: "user", content: promptUtilisateur },
+                { role: "assistant", content: fullText }
             );
 
-            return reponse;
+            return fullText;
         }
 
-        // Démarrer
+        // Démarrage du processus (étape 0 + code + données)
         async function demarrerConversation() {
             if (conversationState.enCours) return;
             
@@ -604,36 +692,37 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                 conversationState.enCours = true;
                 const userData = document.getElementById('userData').value.trim();
                 
-                document.getElementById('conversation').innerHTML = '';
+                document.getElementById('conversation').innerHTML = `
+                    <div class="info">
+                        ⏳ Initialisation de l'assistant Pass-Orientation...
+                    </div>
+                `;
                 conversationState.historique = [];
 
                 const btnStart = document.getElementById('btnStart');
                 btnStart.disabled = true;
-                btnStart.innerHTML = '⏳ En cours...';
+                btnStart.textContent = '⏳ En cours...';
 
-                // Étape 0
+                // Étape 0 : démarrer
                 const reponseAccueil = await appelMistral('Démarrer Pass-Orientation');
-                ajouterMessage('assistant', reponseAccueil);
+                genererBoutons(reponseAccueil);
 
-                // Automatiquement envoyer le code
+                // Envoyer automatiquement le code d'accès
                 setTimeout(async () => {
                     ajouterMessage('user', '197475');
                     const reponseCode = await appelMistral('197475');
-                    ajouterMessage('assistant', reponseCode);
+                    genererBoutons(reponseCode);
 
-                    // Si données, les envoyer
+                    // Si données fournies, les envoyer
                     if (userData) {
                         setTimeout(async () => {
-                            ajouterMessage('user', `Voici mes données :\n\n${userData}`);
-                            const reponseDonnees = await appelMistral(`Voici mes données :\n\n${userData}`);
-                            ajouterMessage('assistant', reponseDonnees);
-                            
+                            const texteDonnees = `Voici mes données :\n\n${userData}`;
+                            ajouterMessage('user', texteDonnees);
+                            const reponseDonnees = await appelMistral(texteDonnees);
                             genererBoutons(reponseDonnees);
-                        }, 1500);
-                    } else {
-                        genererBoutons(reponseCode);
+                        }, 1200);
                     }
-                }, 1500);
+                }, 1200);
 
             } catch (error) {
                 console.error('Erreur:', error);
@@ -641,16 +730,15 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
             } finally {
                 const btnStart = document.getElementById('btnStart');
                 btnStart.disabled = false;
-                btnStart.innerHTML = '🚀 Démarrer Pass-Orientation';
+                btnStart.textContent = '🚀 Démarrer Pass-Orientation';
                 conversationState.enCours = false;
             }
         }
 
-        // Générer boutons selon la réponse
+        // Générer les boutons en fonction du texte de Mistral
         function genererBoutons(texte) {
             const conversation = document.getElementById('conversation');
             
-            // Supprimer anciens boutons
             const oldChoices = document.getElementById('choicesZone');
             if (oldChoices) oldChoices.remove();
 
@@ -658,61 +746,38 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
             choicesDiv.id = 'choicesZone';
             choicesDiv.className = 'choices-container';
 
-            // ═══════════════════════════════════════════════════════════
-            // DÉTECTION BASÉE SUR LES INSTRUCTIONS PASS-ORIENTATION
-            // ═══════════════════════════════════════════════════════════
-            
             const options = extraireOptionsNumerotees(texte);
             
-            console.log('🔍 Détection:', {
+            console.log('🔍 Détection boutons:', {
                 texteLength: texte.length,
                 optionsTrouvees: options.length,
-                derniereLigne: texte.substring(texte.length - 300)
+                extrait: texte.substring(texte.length - 300)
             });
             
-            // ─────────────────────────────────────────────────────────
-            // TYPE 1 : OUI/NON explicite
-            // ─────────────────────────────────────────────────────────
-            // Étape 4, 8, 10, 11, 12 : Questions avec (OUI / NON)
-            
+            // OUI / NON explicite
             if (texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*|\(OUI\s*\/\s*NON\)|OUI\s+ou\s+NON/i)) {
-                console.log('✅ Type: OUI/NON (mention explicite)');
                 choicesDiv.innerHTML = `
                     <h4>Votre réponse :</h4>
                     <button class="btn-choice" onclick="envoyerChoix('OUI')">✅ OUI</button>
                     <button class="btn-choice" onclick="envoyerChoix('NON')">❌ NON</button>
                 `;
             }
-            
-            // ─────────────────────────────────────────────────────────
-            // TYPE 2 : Questions de confirmation sans liste
-            // ─────────────────────────────────────────────────────────
-            // "Souhaitez-vous..." + pas de liste numérotée
-            
-            else if (texte.match(/souhaitez-vous|confirmez-vous|voulez-vous/i) && 
+            // Question de type "Souhaitez-vous..." sans liste
+            else if (texte.match(/souhaitez-vous|confirmez-vous|voulez-vous/i) &&
                      options.length === 0) {
-                console.log('✅ Type: OUI/NON (question confirmation)');
                 choicesDiv.innerHTML = `
                     <h4>Votre réponse :</h4>
                     <button class="btn-choice" onclick="envoyerChoix('OUI')">✅ OUI</button>
                     <button class="btn-choice" onclick="envoyerChoix('NON')">❌ NON</button>
                 `;
             }
-            
-            // ─────────────────────────────────────────────────────────
-            // TYPE 3 : Sélection de 3 éléments (domaines ou métiers podium)
-            // ─────────────────────────────────────────────────────────
-            // Étape 6.2 : "Vous devez sélectionner 3 domaines"
-            // Étape 9.2 : "quels sont les 3 métiers... pour votre podium"
-            
+            // Sélection de 3 éléments (domaines ou podium)
             else if (texte.match(/sélectionnez?\s+3\s+(domaines|métiers)|3\s+métiers.*podium|Vous devez sélectionner 3/i)) {
                 const nbChoix = 3;
-                console.log(`✅ Type: Sélection multiple (${nbChoix} choix)`);
-                
                 if (options.length > 0) {
                     choicesDiv.innerHTML = `
                         <h4>Sélectionnez exactement ${nbChoix} choix :</h4>
-                        <div class="info">Indiquez les numéros séparés par des virgules (ex: 1, 3, 5)</div>
+                        <div class="info">Indiquez les numéros via les cases ci-dessous, puis validez.</div>
                         <div class="counter" id="counter">0 / ${nbChoix} sélectionné(s)</div>
                         <div class="checkbox-group" id="checkboxGroup"></div>
                     `;
@@ -737,16 +802,9 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                     choicesDiv.appendChild(btnValidate);
                 }
             }
-            
-            // ─────────────────────────────────────────────────────────
-            // TYPE 4 : Choix unique - Univers
-            // ─────────────────────────────────────────────────────────
-            // Étape 6.1 : "Par quel univers souhaitez-vous commencer"
-            
-            else if (texte.match(/par quel univers|quel univers.*commencer|indiquez le numéro de l'univers/i) && 
+            // Choix unique - Univers
+            else if (texte.match(/par quel univers|quel univers.*commencer|indiquez le numéro de l'univers/i) &&
                      options.length > 0) {
-                console.log(`✅ Type: Choix univers (${options.length} options)`);
-                
                 choicesDiv.innerHTML = '<h4>Choisissez un univers :</h4>';
                 options.forEach(opt => {
                     const btn = document.createElement('button');
@@ -756,20 +814,10 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                     choicesDiv.appendChild(btn);
                 });
             }
-            
-            // ─────────────────────────────────────────────────────────
-            // TYPE 5 : Choix unique - Métier du podium pour parcours
-            // ─────────────────────────────────────────────────────────
-            // Étape 10.2 : "Pour quel métier souhaitez-vous consulter le parcours ?"
-            // Attend : 1, 2 ou 3
-            
+            // Choix unique - Métier du podium pour parcours
             else if (texte.match(/pour quel métier.*parcours|métier.*consulter.*parcours|indiquez.*1.*2.*3/i) &&
                      (options.length === 3 || texte.match(/1.*2.*3/))) {
-                console.log('✅ Type: Choix métier podium (1, 2 ou 3)');
-                
                 choicesDiv.innerHTML = '<h4>Choisissez un métier :</h4>';
-                
-                // Si options détectées, les utiliser
                 if (options.length > 0) {
                     options.forEach(opt => {
                         const btn = document.createElement('button');
@@ -779,7 +827,6 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                         choicesDiv.appendChild(btn);
                     });
                 } else {
-                    // Sinon, proposer 1, 2, 3 générique
                     for (let i = 1; i <= 3; i++) {
                         const btn = document.createElement('button');
                         btn.className = 'btn-choice';
@@ -789,15 +836,8 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                     }
                 }
             }
-            
-            // ─────────────────────────────────────────────────────────
-            // TYPE 6 : Choix unique général (liste numérotée)
-            // ─────────────────────────────────────────────────────────
-            // Pour toute autre liste numérotée
-            
+            // Choix unique général - liste numérotée
             else if (options.length > 0) {
-                console.log(`✅ Type: Choix unique (${options.length} options)`);
-                
                 choicesDiv.innerHTML = '<h4>Choisissez une option :</h4>';
                 options.forEach(opt => {
                     const btn = document.createElement('button');
@@ -807,111 +847,77 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                     choicesDiv.appendChild(btn);
                 });
             }
-            
-            // ─────────────────────────────────────────────────────────
-            // TYPE 7 : Code d'accès (géré automatiquement)
-            // ─────────────────────────────────────────────────────────
-            
+            // Code d'accès (géré automatiquement)
             else if (texte.includes('code confidentiel') || texte.includes('197475')) {
-                console.log('✅ Type: Code d\'accès (auto-géré)');
-                return; // Géré automatiquement
+                // Pas de boutons, le code est injecté automatiquement au démarrage
+                return;
             }
-            
-            // ─────────────────────────────────────────────────────────
-            // TYPE 8 : Message informatif (pas de choix)
-            // ─────────────────────────────────────────────────────────
-            
+            // Message informatif simple
             else {
-                console.log('ℹ️ Type: Message informatif (pas de boutons)');
                 return;
             }
 
             conversation.appendChild(choicesDiv);
         }
 
-        // Extraire options numérotées
+        // Extraire les options numérotées depuis un texte
         function extraireOptionsNumerotees(texte) {
             const options = [];
-            
-            // Méthode 1 : Format "1. Texte" ou "1) Texte"
             const regex1 = /^(\d+)[.)]\s*([^\n]+)/gm;
             let match;
             while ((match = regex1.exec(texte)) !== null) {
-                const numero = parseInt(match[1]);
-                const texte = match[2].trim();
-                
-                // Éviter les faux positifs (dates, numéros de page, etc.)
-                if (texte.length > 5 && texte.length < 200) {
-                    options.push({ numero, texte });
+                const numero = parseInt(match[1], 10);
+                const t = match[2].trim();
+                if (t.length > 5 && t.length < 250) {
+                    options.push({ numero, texte: t });
                 }
             }
-            
-            // Si aucune option trouvée, essayer format liste avec tirets
             if (options.length === 0) {
                 const regex2 = /^[-•]\s*([^\n]+)/gm;
                 let index = 1;
                 while ((match = regex2.exec(texte)) !== null) {
-                    const texte = match[1].trim();
-                    if (texte.length > 5 && texte.length < 200) {
-                        options.push({ numero: index++, texte });
+                    const t = match[1].trim();
+                    if (t.length > 5 && t.length < 250) {
+                        options.push({ numero: index++, texte: t });
                     }
                 }
             }
-            
             return options;
         }
 
-        // Update counter
+        // Mise à jour du compteur pour sélection multiple
         function updateCounter(max) {
             const checkboxes = document.querySelectorAll('#checkboxGroup input[type="checkbox"]:checked');
             const count = checkboxes.length;
-            document.getElementById('counter').textContent = `${count} / ${max} sélectionné(s)`;
-            document.getElementById('validateBtn').disabled = (count !== max);
+            const counter = document.getElementById('counter');
+            const validateBtn = document.getElementById('validateBtn');
+
+            if (counter) counter.textContent = `${count} / ${max} sélectionné(s)`;
+            if (validateBtn) validateBtn.disabled = (count !== max);
         }
 
-        // Envoyer choix simple
+        // Envoyer une réponse simple (OUI, NON, numéro...)
         async function envoyerChoix(valeur) {
             if (conversationState.enCours) return;
             conversationState.enCours = true;
 
             try {
-                // Supprimer boutons
                 document.getElementById('choicesZone')?.remove();
-
-                // Afficher choix utilisateur
                 ajouterMessage('user', valeur);
+                await new Promise(res => setTimeout(res, 200));
 
-                // ═══════════════════════════════════════════════════════════
-                // DÉLAI COURT pour que le message user soit bien visible
-                // ═══════════════════════════════════════════════════════════
-                await new Promise(resolve => setTimeout(resolve, 300));
-
-                // Loading
-                const conversation = document.getElementById('conversation');
-                const loading = document.createElement('div');
-                loading.className = 'loading';
-                loading.id = 'loadingIndicator';
-                loading.innerHTML = '<div class="spinner"></div><p>Mistral analyse...</p>';
-                conversation.appendChild(loading);
-
-                // Appeler Mistral
                 const reponse = await appelMistral(valeur);
-                
-                document.getElementById('loadingIndicator')?.remove();
-                ajouterMessage('assistant', reponse);
-                
-                // Générer nouveaux boutons
                 genererBoutons(reponse);
 
             } catch (error) {
-                document.getElementById('loadingIndicator')?.remove();
+                console.error(error);
                 ajouterMessage('assistant', `❌ Erreur : ${error.message}`);
             } finally {
                 conversationState.enCours = false;
             }
         }
 
-        // Envoyer sélection multiple
+        // Envoyer une sélection multiple (ex: 3 domaines)
         async function envoyerSelectionMultiple(nb) {
             const checkboxes = document.querySelectorAll('#checkboxGroup input[type="checkbox"]:checked');
             if (checkboxes.length !== nb) {
@@ -921,11 +927,10 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
 
             const valeurs = Array.from(checkboxes).map(cb => cb.value);
             const texte = valeurs.join(', ');
-            
             await envoyerChoix(texte);
         }
 
-        // Réinitialiser
+        // Réinitialiser la conversation
         function reinitialiser() {
             if (confirm('Voulez-vous recommencer ?')) {
                 conversationState = {
