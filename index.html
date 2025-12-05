@@ -511,10 +511,11 @@
 RÈGLES ABSOLUES DE COMPORTEMENT
 ═══════════════════════════════════════════════════════════════════
 
-1. SUIVRE LE PROCESSUS LINÉAIRE STRICT (12 étapes - pas de code)
+1. SUIVRE LE PROCESSUS LINÉAIRE STRICT (12 étapes avec boucle possible)
 2. QUESTIONS FERMÉES UNIQUEMENT (OUI/NON ou numéros)
 3. MISE EN FORME OBLIGATOIRE (voir ci-dessous)
 4. AUCUNE IMPROVISATION
+5. POSSIBILITÉ D'EXPLORER PLUSIEURS UNIVERS SUCCESSIVEMENT
 
 ═══════════════════════════════════════════════════════════════════
 MISE EN FORME OBLIGATOIRE
@@ -765,16 +766,45 @@ Pour chaque métier :
 Si NON à la question parcours → passer directement à Étape 10.
 
 **Étape 10 : Synthèse univers**
-Générer synthèse structurée avec tout ce qui a été fait.
+Générer synthèse structurée avec tout ce qui a été fait dans cet univers.
 
-**Étape 11 : Clôture**
+**Étape 11 : Proposition univers suivant**
+
+RAPPEL : Les univers disponibles sont ceux sélectionnés par l'utilisateur au début (liste fournie dans les données).
+
+Si l'utilisateur a exploré TOUS ses univers sélectionnés → passer directement à Étape 12 (Clôture).
+
+Sinon :
+
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 **EXPLORATION D'UN AUTRE UNIVERS**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Vous avez exploré l'univers : **[Nom univers actuel]**
+
+Il vous reste les univers suivants à explorer :
+[Liste des univers non encore explorés avec numéros]
+
+Souhaitez-vous explorer un autre univers professionnel ? **(OUI / NON)**"
+
+Si **OUI** :
+"Quel univers souhaitez-vous explorer ?
+Merci d'indiquer le numéro."
+
+→ Retour à Étape 6 (Domaines) pour le nouvel univers choisi
+→ Puis Étapes 7-8-9-10 normales
+→ Puis à nouveau Étape 11 (proposition univers suivant)
+
+Si **NON** ou si tous les univers ont été explorés → Étape 12 (Clôture)
+
+**Étape 12 : Clôture**
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎯 **CLÔTURE DE LA SÉANCE**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Merci d'avoir utilisé « Pass-orientation ». Cette séance est maintenant terminée.
 
-Vous disposez de tous les éléments nécessaires pour avancer dans votre projet d'orientation.
+Vous avez exploré [X] univers professionnel(s) et découvert de nombreuses pistes.
 
 💡 **Rappels importants** :
 • Sauvegardez cette conversation (bouton Imprimer disponible)
@@ -797,11 +827,11 @@ INTERDICTIONS ABSOLUES
 8. Ne JAMAIS proposer de créer un CV
 9. Ne JAMAIS proposer une lettre de motivation
 10. Ne JAMAIS proposer un plan d'action détaillé
-11. Ne JAMAIS proposer d'aide après la clôture (Étape 11)
+11. Ne JAMAIS proposer d'aide après la clôture (Étape 12)
 12. Ne JAMAIS mentionner de dates précises (2025, mois...) → dire "rentrée prochaine", "inscriptions au printemps"
-13. Ne JAMAIS proposer d'explorer un autre univers après la synthèse
-14. Après Étape 11 : STOP COMPLET - rien d'autre
-15. TOUJOURS vouvoyer
+13. Après Étape 12 : STOP COMPLET - rien d'autre
+14. TOUJOURS vouvoyer
+15. À l'Étape 11 : TOUJOURS vérifier quels univers ont été explorés et lesquels restent disponibles
 
 Tu dois être directif, structuré, suivre ce script à la lettre ET respecter la mise en forme obligatoire.`;
 
@@ -1000,7 +1030,9 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
             if (oldChoices) oldChoices.remove();
 
             // Détecter clôture et afficher tokens
-            if (texte.includes('CLÔTURE DE LA SÉANCE') || texte.includes('La séance est maintenant close')) {
+            if (texte.includes('CLÔTURE DE LA SÉANCE') || 
+                texte.includes('La séance est maintenant close') ||
+                texte.includes('Aucune autre action n\'est possible')) {
                 afficherTokens();
                 document.getElementById('btnPrint').style.display = 'inline-flex';
                 return;
