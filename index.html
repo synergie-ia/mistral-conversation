@@ -210,6 +210,16 @@
             box-shadow: 0 5px 20px rgba(255, 111, 0, 0.4);
         }
 
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(33, 150, 243, 0.4);
+        }
+
         .btn-choice {
             background: white;
             color: #333;
@@ -347,6 +357,55 @@
             font-size: 13px;
             color: #e65100;
         }
+
+        .token-stats {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+
+        .token-stats h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .token-stats .stat-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .token-stats .stat-value {
+            font-weight: 700;
+            color: #1b5e20;
+        }
+
+        /* Styles d'impression */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .header, .card:first-child, .btn, .choices-container {
+                display: none !important;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .message {
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ddd;
+                margin: 10px 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -357,10 +416,23 @@
         </div>
 
         <!-- Configuration -->
-        <div class="card">
+        <div class="card" id="configCard">
             <div class="config-section">
                 <h3>⚙️ Configuration</h3>
                 
+                <div class="input-group">
+                    <label for="codeAccess">🔐 Code d'accès confidentiel</label>
+                    <input 
+                        type="password" 
+                        id="codeAccess" 
+                        placeholder="Entrez le code d'accès"
+                        maxlength="6"
+                    >
+                    <div class="info">
+                        Un code confidentiel est requis pour accéder à Pass-Orientation.
+                    </div>
+                </div>
+
                 <div class="input-group">
                     <label for="apiKey">🔑 Clé API Mistral</label>
                     <input 
@@ -402,9 +474,15 @@
     
         <!-- Zone de conversation -->
         <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #ff6f00;">💬 Conversation</h3>
+                <button class="btn btn-secondary" id="btnPrint" onclick="imprimerSynthese()" style="display: none;">
+                    🖨️ Imprimer la synthèse
+                </button>
+            </div>
             <div class="conversation-container" id="conversation">
                 <div class="info">
-                    👆 Configurez votre clé API et collez votre jeu d'essai, puis cliquez sur "Démarrer"
+                    👆 Configurez le code d'accès, votre clé API et collez votre jeu d'essai, puis cliquez sur "Démarrer"
                 </div>
             </div>
         </div>
@@ -413,10 +491,13 @@
     <div class="status" id="status"></div>
 
     <script>
+        const CODE_CONFIDENTIEL = "197475";
+        
         let conversationState = {
             historique: [],
             etape: 'config',
-            enCours: false
+            enCours: false,
+            tokensTotal: { input: 0, output: 0 }
         };
 
         const MISTRAL_LOGO_SVG = `<svg class="mistral-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -430,7 +511,7 @@
 RÈGLES ABSOLUES DE COMPORTEMENT
 ═══════════════════════════════════════════════════════════════════
 
-1. SUIVRE LE PROCESSUS LINÉAIRE STRICT (13 étapes)
+1. SUIVRE LE PROCESSUS LINÉAIRE STRICT (12 étapes - pas de code)
 2. QUESTIONS FERMÉES UNIQUEMENT (OUI/NON ou numéros)
 3. MISE EN FORME OBLIGATOIRE (voir ci-dessous)
 4. AUCUNE IMPROVISATION
@@ -439,7 +520,7 @@ RÈGLES ABSOLUES DE COMPORTEMENT
 MISE EN FORME OBLIGATOIRE
 ═══════════════════════════════════════════════════════════════════
 
-**MÉTIERS (Étape 8) :**
+**MÉTIERS (Étape 7-8) :**
 
 Pour CHAQUE métier, utiliser CE FORMAT EXACT :
 
@@ -482,12 +563,18 @@ MÉTIER [N°] : **[Nom du métier]**
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**FORMATIONS (Étape 10) :**
+**APRÈS CHAQUE PAIRE DE MÉTIERS (1-2, 3-4, 5-6, 7-8) :**
+
+"⏸️ **Prenez le temps d'analyser ces métiers avant de poursuivre.**
+
+Cliquez sur **Continuer** quand vous êtes prêt."
+
+**FORMATIONS (Étape 9) :**
 
 Pour CHAQUE parcours de formation, utiliser CE FORMAT EXACT :
 
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-PARCOURS N°[X] : **[Type de parcours]**
+**PARCOURS N°[X]** : *[Type de parcours]*
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
 🎓 **FORMATION** : [Nom exact du diplôme]
@@ -515,7 +602,7 @@ PARCOURS N°[X] : **[Type de parcours]**
 📝 **INSCRIPTION** :
 • Procédure : [Parcoursup / Dossier / Concours...]
 • Sélectivité : [Faible / Moyenne / Forte]
-• Dates clés : [à préciser]
+• Période : [Ex: "Inscriptions au printemps pour rentrée suivante"]
 
 🚀 **APRÈS CE DIPLÔME** :
 • Accès direct au métier : [OUI/NON]
@@ -524,99 +611,119 @@ PARCOURS N°[X] : **[Type de parcours]**
 
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
-**AIDE AU CHOIX (Étape 9 - MÉTIERS) :**
+**AIDE AU CHOIX - MÉTIERS (Étape 8 après les 10 métiers) :**
 
-Titre obligatoire :
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 SCÉNARIOS POUR VOUS AIDER À CHOISIR VOS 3 MÉTIERS
+💡 **SCÉNARIOS POUR VOUS AIDER À CHOISIR VOS 3 MÉTIERS**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Générer 3 à 5 scénarios :
+Générer 3 à 5 scénarios bien séparés :
 
-**SCÉNARIO 1 : [Titre du scénario]** (ex: "Si vous privilégiez l'accessibilité rapide")
-→ Métiers recommandés : [N°X, N°Y, N°Z]
-→ Pourquoi : [Explication 2-3 lignes]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**SCÉNARIO 1** : *[Titre du scénario]*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**SCÉNARIO 2 : [Titre]** (ex: "Si vous privilégiez vos valeurs écologiques")
-→ Métiers recommandés : [N°A, N°B, N°C]
-→ Pourquoi : [Explication]
+→ **Métiers recommandés** : *N°X, N°Y, N°Z*
+→ **Pourquoi** : *[Explication 2-3 lignes]*
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**SCÉNARIO 2** : *[Titre]*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+→ **Métiers recommandés** : *N°A, N°B, N°C*
+→ **Pourquoi** : *[Explication]*
 
 [etc.]
 
-**AIDE AU CHOIX (Étape 10 - PARCOURS) :**
+**Puis message de pause :**
 
-Titre obligatoire pour CHAQUE métier du podium :
+"⏸️ **Prenez le temps d'analyser ces scénarios avant de choisir votre podium.**
+
+Cliquez sur **Continuer** quand vous êtes prêt."
+
+**AIDE AU CHOIX - PARCOURS (Étape 9 pour chaque métier du podium) :**
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 CONSEIL STRATÉGIQUE — MÉTIER : [Nom]
+💡 **CONSEIL STRATÉGIQUE** — MÉTIER : *[Nom]*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **PARCOURS LE PLUS ADAPTÉ À VOTRE PROFIL** :
-Parcours N°[X] parce que : [explication personnalisée 3-4 lignes tenant compte de Q1-Q15, catégorie, contraintes]
+Parcours N°[X] parce que : *[explication personnalisée 3-4 lignes tenant compte de Q1-Q15, catégorie, contraintes]*
 
 **ALTERNATIVE INTÉRESSANTE** :
-Parcours N°[Y] si : [conditions spécifiques]
+Parcours N°[Y] si : *[conditions spécifiques]*
 
 **À NOTER** :
-[Points d'attention spécifiques, compromis éventuels]
+*[Points d'attention spécifiques, compromis éventuels]*
 
 ═══════════════════════════════════════════════════════════════════
 FORMULATIONS EXACTES OBLIGATOIRES
 ═══════════════════════════════════════════════════════════════════
 
-**Étape 0 :**
+**Étape 1 (Accueil - pas de code) :**
 "Bonjour, je suis l'assistant virtuel « Pass-orientation ».
-Ce contenu est une création originale protégée par le droit d'auteur.
-Toute reproduction, imitation ou réutilisation non autorisée est interdite.
 
-Merci d'entrer le code confidentiel pour continuer."
-
-Si code = 197475 :
-"Accès autorisé. Bienvenue !"
-
-**Étape 1 :**
-"Pour commencer l'analyse de votre profil, merci de me transmettre le document contenant les 3 éléments suivants :
+Pour commencer l'analyse de votre profil, merci de me transmettre le document contenant les 3 éléments suivants :
 • Votre profil d'intérêts (12 dimensions avec scores)
 • Votre bilan de situation complet (réponses aux questions)
 • Les univers métiers que vous avez sélectionnés (3 à 5 univers)
 
-Vous pouvez coller le contenu dans le chat.
 Je suis en attente de ce document pour poursuivre."
 
-**Étape 4 :**
+**Étape 2 : Contrôle qualité** (si problème, lister les problèmes et bloquer)
+
+**Étape 3 : Synthèse de profil**
+
+**Étape 4 : Validation**
 Terminer EXACTEMENT par : "[Prénom], souhaitez-vous compléter, corriger ou enrichir cette synthèse de votre profil ? **(OUI / NON)**"
+
+**Étape 5 : Catégorie (interne, ne pas mentionner)**
 
 **Étape 6 - Univers :**
 "VOS UNIVERS SÉLECTIONNÉS (classés par compatibilité)
+
 [Liste numérotée avec scores]
 
 Par quel univers souhaitez-vous commencer votre exploration ?
 Merci d'indiquer le numéro de l'univers choisi."
 
 **Étape 6 - Domaines :**
-Tu dois générer toi-même 6 à 8 domaines professionnels adaptés au profil.
+Tu dois générer toi-même 6 à 8 **DOMAINES LARGES** (regroupements de métiers, PAS des métiers spécifiques).
+
+Exemples de domaines larges :
+✅ "Maintenance et réparation"
+✅ "Conseil et expertise technique"
+✅ "Gestion et commerce"
+✅ "Production et transformation"
+❌ "Technicien de maintenance agricole" (trop spécifique)
 
 "UNIVERS : [Nom]
 
 Voici les domaines disponibles dans cet univers :
-[Liste numérotée 1-8 avec description 1 ligne chacun]
+
+[Liste numérotée 1-8 avec description 1 ligne chacun - DOMAINES LARGES]
 
 Vous devez sélectionner 3 domaines à explorer.
 Merci d'indiquer les numéros des domaines qui vous intéressent.
 Exemple : 2, 5, 7"
 
-**Étape 7 :**
+**Étape 7 : Génération TOP 10**
 IMPORTANT : Générer EXACTEMENT 10 métiers répartis sur les 3 domaines (ex: 4+3+3).
-Ne jamais générer moins de 10 métiers.
 
-**Étape 8 :**
-Présenter les 10 métiers 2 par 2 (5 affichages).
+**Étape 8 : Présentation 2 par 2**
 
-Après CHAQUE paire (métiers 1-2, 3-4, 5-6, 7-8) :
-"Souhaitez-vous voir les métiers suivants ? **(OUI / NON)**"
+Présenter les métiers 1-2, PUIS :
+"⏸️ **Prenez le temps d'analyser ces métiers avant de poursuivre.**
 
-Après les métiers 9-10 (dernière paire) :
+Cliquez sur **Continuer** quand vous êtes prêt."
+
+Présenter les métiers 3-4, PUIS même message.
+Présenter les métiers 5-6, PUIS même message.
+Présenter les métiers 7-8, PUIS même message.
+Présenter les métiers 9-10, PUIS :
+
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 RÉCAPITULATIF DES 10 MÉTIERS PRÉSENTÉS
+📋 **RÉCAPITULATIF DES 10 MÉTIERS PRÉSENTÉS**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 1. [Nom métier] — [Domaine]
@@ -624,13 +731,12 @@ Après les métiers 9-10 (dernière paire) :
 ...
 10. [Nom métier] — [Domaine]"
 
-Puis passer AUTOMATIQUEMENT à l'Étape 9 (aide au choix + podium).
+PUIS afficher les scénarios d'aide au choix + message pause.
 
-**Étape 9 :**
-D'ABORD afficher l'aide au choix (scénarios), PUIS :
+**Après la pause scénarios :**
 
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏆 CONSTITUTION DE VOTRE PODIUM
+🏆 **CONSTITUTION DE VOTRE PODIUM**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Parmi les 10 métiers présentés, quels sont les 3 métiers que vous souhaitez retenir pour votre podium ?
@@ -639,7 +745,7 @@ Parmi les 10 métiers présentés, quels sont les 3 métiers que vous souhaitez 
 
 Merci d'indiquer les **3 numéros** correspondant à votre podium (exemple : 1, 4, 7)."
 
-**Étape 10 :**
+**Étape 9 : Parcours**
 "Souhaitez-vous consulter les parcours pour les métiers de votre podium ? **(OUI / NON)**"
 
 Si OUI :
@@ -656,34 +762,46 @@ Pour chaque métier :
 - PUIS afficher le conseil stratégique
 - PUIS demander : "Souhaitez-vous consulter les parcours pour les autres métiers de votre podium ? **(OUI / NON)**"
 
+Si NON à la question parcours → passer directement à Étape 10.
+
+**Étape 10 : Synthèse univers**
+Générer synthèse structurée avec tout ce qui a été fait.
+
+**Étape 11 : Clôture**
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 **CLÔTURE DE LA SÉANCE**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Merci d'avoir utilisé « Pass-orientation ». Cette séance est maintenant terminée.
+
+Vous disposez de tous les éléments nécessaires pour avancer dans votre projet d'orientation.
+
+💡 **Rappels importants** :
+• Sauvegardez cette conversation (bouton Imprimer disponible)
+• Contactez un conseiller d'orientation pour approfondir
+• L'orientation est un cheminement, pas une destination
+
+La séance est maintenant close. Aucune autre action n'est possible dans cette session."
+
 ═══════════════════════════════════════════════════════════════════
 INTERDICTIONS ABSOLUES
 ═══════════════════════════════════════════════════════════════════
 
 1. Ne JAMAIS poser de question ouverte
-2. Ne JAMAIS dire "que souhaitez-vous faire ?"
-3. Ne JAMAIS demander "avez-vous des questions ?"
-4. Ne JAMAIS générer moins de 10 métiers à l'Étape 7
-5. Ne JAMAIS sauter l'affichage des 10 métiers
-6. Ne JAMAIS oublier les scénarios d'aide au choix
-7. Ne JAMAIS oublier le conseil stratégique pour les parcours
-8. Ne JAMAIS dévier de la mise en forme obligatoire
-9. TOUJOURS vouvoyer
-
-═══════════════════════════════════════════════════════════════════
-CATÉGORISATION (Étape 5 - interne)
-═══════════════════════════════════════════════════════════════════
-
-Déterminer la catégorie (ne pas la mentionner à l'utilisateur) :
-1. EXPLORATION
-2. ORIENTATION SCOLAIRE
-3. RÉORIENTATION
-4. INSERTION RAPIDE
-5. TRANSITION PROGRESSIVE
-
-Utiliser cette catégorie pour adapter :
-- Les critères de sélection des métiers (Étape 7)
-- Le type de parcours proposé (Étape 10)
+2. Ne JAMAIS demander "avez-vous des questions ?"
+3. Ne JAMAIS générer moins de 10 métiers
+4. Ne JAMAIS sauter l'affichage des 10 métiers
+5. Ne JAMAIS oublier les scénarios d'aide au choix
+6. Ne JAMAIS oublier le conseil stratégique pour les parcours
+7. Ne JAMAIS dévier de la mise en forme obligatoire
+8. Ne JAMAIS proposer de créer un CV
+9. Ne JAMAIS proposer une lettre de motivation
+10. Ne JAMAIS proposer un plan d'action détaillé
+11. Ne JAMAIS proposer d'aide après la clôture (Étape 11)
+12. Ne JAMAIS mentionner de dates précises (2025, mois...) → dire "rentrée prochaine", "inscriptions au printemps"
+13. Ne JAMAIS proposer d'explorer un autre univers après la synthèse
+14. Après Étape 11 : STOP COMPLET - rien d'autre
+15. TOUJOURS vouvoyer
 
 Tu dois être directif, structuré, suivre ce script à la lettre ET respecter la mise en forme obligatoire.`;
 
@@ -789,6 +907,12 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
                             fullText += delta;
                             updateDOM();
                         }
+
+                        // Capturer les tokens usage si disponible
+                        if (data.usage) {
+                            conversationState.tokensTotal.input += data.usage.prompt_tokens || 0;
+                            conversationState.tokensTotal.output += data.usage.completion_tokens || 0;
+                        }
                     } catch (e) {
                         console.warn("Chunk ignoré :", jsonStr);
                     }
@@ -805,8 +929,28 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
             return fullText;
         }
 
+        function verifierCodeAcces() {
+            const code = document.getElementById('codeAccess').value.trim();
+            if (code !== CODE_CONFIDENTIEL) {
+                alert('❌ Code d\'accès incorrect. Veuillez réessayer.');
+                return false;
+            }
+            return true;
+        }
+
         async function demarrerConversation() {
             if (conversationState.enCours) return;
+            
+            // Vérifier le code d'accès
+            if (!verifierCodeAcces()) {
+                return;
+            }
+
+            const apiKey = document.getElementById('apiKey').value.trim();
+            if (!apiKey) {
+                alert('❌ Veuillez entrer votre clé API Mistral.');
+                return;
+            }
             
             try {
                 conversationState.enCours = true;
@@ -818,28 +962,25 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
                     </div>
                 `;
                 conversationState.historique = [];
+                conversationState.tokensTotal = { input: 0, output: 0 };
 
                 const btnStart = document.getElementById('btnStart');
                 btnStart.disabled = true;
                 btnStart.textContent = '⏳ En cours...';
 
+                // Étape 1 : Accueil (pas de code)
                 const reponseAccueil = await appelMistral('Démarrer Pass-Orientation');
                 genererBoutons(reponseAccueil);
 
-                setTimeout(async () => {
-                    ajouterMessage('user', '197475');
-                    const reponseCode = await appelMistral('197475');
-                    genererBoutons(reponseCode);
-
-                    if (userData) {
-                        setTimeout(async () => {
-                            const texteDonnees = `Voici mes données :\n\n${userData}`;
-                            ajouterMessage('user', texteDonnees);
-                            const reponseDonnees = await appelMistral(texteDonnees);
-                            genererBoutons(reponseDonnees);
-                        }, 1200);
-                    }
-                }, 1200);
+                // Si données fournies, les envoyer automatiquement
+                if (userData) {
+                    setTimeout(async () => {
+                        const texteDonnees = `Voici mes données :\n\n${userData}`;
+                        ajouterMessage('user', texteDonnees);
+                        const reponseDonnees = await appelMistral(texteDonnees);
+                        genererBoutons(reponseDonnees);
+                    }, 1200);
+                }
 
             } catch (error) {
                 console.error('Erreur:', error);
@@ -858,33 +999,43 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
             const oldChoices = document.getElementById('choicesZone');
             if (oldChoices) oldChoices.remove();
 
+            // Détecter clôture et afficher tokens
+            if (texte.includes('CLÔTURE DE LA SÉANCE') || texte.includes('La séance est maintenant close')) {
+                afficherTokens();
+                document.getElementById('btnPrint').style.display = 'inline-flex';
+                return;
+            }
+
             const choicesDiv = document.createElement('div');
             choicesDiv.id = 'choicesZone';
             choicesDiv.className = 'choices-container';
 
             const options = extraireOptionsNumerotees(texte);
             
-            console.log('🔍 Détection boutons:', {
-                texteLength: texte.length,
-                optionsTrouvees: options.length,
-                extrait: texte.substring(texte.length - 300)
-            });
-            
-            if (texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*|\(OUI\s*\/\s*NON\)|OUI\s+ou\s+NON/i)) {
+            // Détecter message "Prenez le temps" → bouton Continuer
+            if (texte.match(/Prenez le temps|Cliquez sur.*Continuer/i)) {
+                choicesDiv.innerHTML = `
+                    <h4>Quand vous êtes prêt :</h4>
+                    <button class="btn btn-secondary" onclick="envoyerChoix('Continuer')">▶️ Continuer</button>
+                `;
+            }
+            // OUI / NON explicite
+            else if (texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*|\(OUI\s*\/\s*NON\)|OUI\s+ou\s+NON/i)) {
                 choicesDiv.innerHTML = `
                     <h4>Votre réponse :</h4>
                     <button class="btn-choice" onclick="envoyerChoix('OUI')">✅ OUI</button>
                     <button class="btn-choice" onclick="envoyerChoix('NON')">❌ NON</button>
                 `;
             }
-            else if (texte.match(/souhaitez-vous|confirmez-vous|voulez-vous/i) &&
-                     options.length === 0) {
+            // Question confirmation sans liste
+            else if (texte.match(/souhaitez-vous|confirmez-vous|voulez-vous/i) && options.length === 0) {
                 choicesDiv.innerHTML = `
                     <h4>Votre réponse :</h4>
                     <button class="btn-choice" onclick="envoyerChoix('OUI')">✅ OUI</button>
                     <button class="btn-choice" onclick="envoyerChoix('NON')">❌ NON</button>
                 `;
             }
+            // Sélection de 3 éléments
             else if (texte.match(/sélectionnez?\s+3\s+(domaines|métiers)|3\s+métiers.*podium|Vous devez sélectionner 3/i)) {
                 const nbChoix = 3;
                 if (options.length > 0) {
@@ -915,8 +1066,8 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
                     choicesDiv.appendChild(btnValidate);
                 }
             }
-            else if (texte.match(/par quel univers|quel univers.*commencer|indiquez le numéro de l'univers/i) &&
-                     options.length > 0) {
+            // Choix univers
+            else if (texte.match(/par quel univers|quel univers.*commencer|indiquez le numéro de l'univers/i) && options.length > 0) {
                 choicesDiv.innerHTML = '<h4>Choisissez un univers :</h4>';
                 options.forEach(opt => {
                     const btn = document.createElement('button');
@@ -926,6 +1077,7 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
                     choicesDiv.appendChild(btn);
                 });
             }
+            // Choix métier podium
             else if (texte.match(/pour quel métier.*parcours|métier.*consulter.*parcours|indiquez.*1.*2.*3/i) &&
                      (options.length === 3 || texte.match(/1.*2.*3/))) {
                 choicesDiv.innerHTML = '<h4>Choisissez un métier :</h4>';
@@ -947,6 +1099,7 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
                     }
                 }
             }
+            // Choix unique général
             else if (options.length > 0) {
                 choicesDiv.innerHTML = '<h4>Choisissez une option :</h4>';
                 options.forEach(opt => {
@@ -956,9 +1109,6 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
                     btn.onclick = () => envoyerChoix(opt.numero.toString());
                     choicesDiv.appendChild(btn);
                 });
-            }
-            else if (texte.includes('code confidentiel') || texte.includes('197475')) {
-                return;
             }
             else {
                 return;
@@ -1033,18 +1183,59 @@ Tu dois être directif, structuré, suivre ce script à la lettre ET respecter l
             await envoyerChoix(texte);
         }
 
+        function afficherTokens() {
+            const conversation = document.getElementById('conversation');
+            const tokensDiv = document.createElement('div');
+            tokensDiv.className = 'token-stats';
+            tokensDiv.innerHTML = `
+                <h4>📊 Statistiques d'utilisation</h4>
+                <div class="stat-line">
+                    <span>Tokens en entrée :</span>
+                    <span class="stat-value">${conversationState.tokensTotal.input.toLocaleString()}</span>
+                </div>
+                <div class="stat-line">
+                    <span>Tokens en sortie :</span>
+                    <span class="stat-value">${conversationState.tokensTotal.output.toLocaleString()}</span>
+                </div>
+                <div class="stat-line">
+                    <span>Total :</span>
+                    <span class="stat-value">${(conversationState.tokensTotal.input + conversationState.tokensTotal.output).toLocaleString()}</span>
+                </div>
+            `;
+            conversation.appendChild(tokensDiv);
+        }
+
+        function imprimerSynthese() {
+            // Masquer temporairement les éléments non nécessaires
+            document.getElementById('configCard').style.display = 'none';
+            document.getElementById('btnPrint').style.display = 'none';
+            
+            // Imprimer
+            window.print();
+            
+            // Restaurer l'affichage
+            setTimeout(() => {
+                document.getElementById('configCard').style.display = 'block';
+                document.getElementById('btnPrint').style.display = 'inline-flex';
+            }, 500);
+        }
+
         function reinitialiser() {
             if (confirm('Voulez-vous recommencer ?')) {
                 conversationState = {
                     historique: [],
                     etape: 'config',
-                    enCours: false
+                    enCours: false,
+                    tokensTotal: { input: 0, output: 0 }
                 };
                 document.getElementById('conversation').innerHTML = `
                     <div class="info">
-                        👆 Configurez votre clé API et collez votre jeu d'essai, puis cliquez sur "Démarrer"
+                        👆 Configurez le code d'accès, votre clé API et collez votre jeu d'essai, puis cliquez sur "Démarrer"
                     </div>
                 `;
+                document.getElementById('btnPrint').style.display = 'none';
+                document.getElementById('codeAccess').value = '';
+                document.getElementById('userData').value = '';
                 afficherStatut('🔄 Réinitialisé');
             }
         }
