@@ -656,37 +656,43 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
             choicesDiv.id = 'choicesZone';
             choicesDiv.className = 'choices-container';
 
-            // Détecter type de question
-            if (texte.match(/souhaitez-vous|confirmez-vous/i)) {
-                // Boutons OUI/NON
+            // ═══════════════════════════════════════════════════════════
+            // DÉTECTION INTELLIGENTE DU TYPE DE RÉPONSE ATTENDUE
+            // ═══════════════════════════════════════════════════════════
+            
+            // Extraire d'abord les options numérotées (si présentes)
+            const options = extraireOptionsNumerotees(texte);
+            
+            // Debug : afficher le type détecté
+            console.log('🔍 Détection:', {
+                texteLength: texte.length,
+                optionsTrouvees: options.length,
+                options: options
+            });
+            
+            // TYPE 1 : Questions OUI/NON
+            if (texte.match(/souhaitez-vous|confirmez-vous|voulez-vous/i) && options.length === 0) {
+                console.log('✅ Type détecté: OUI/NON');
                 choicesDiv.innerHTML = `
                     <h4>Votre réponse :</h4>
                     <button class="btn-choice" onclick="envoyerChoix('OUI')">✅ OUI</button>
                     <button class="btn-choice" onclick="envoyerChoix('NON')">❌ NON</button>
                 `;
             }
-            else if (texte.match(/par quel univers|quel métier|pour quel métier/i)) {
-                // Extraire options numérotées
-                const options = extraireOptionsNumerotees(texte);
+            
+            // TYPE 2 : Sélection multiple (3 choix parmi liste)
+            else if (texte.match(/sélectionnez\s+(\d+)\s+(domaines|métiers)|(\d+)\s+(métiers|domaines)\s+pour/i)) {
+                const matchNombre = texte.match(/sélectionnez\s+(\d+)|(\d+)\s+(métiers|domaines)\s+pour/i);
+                const nbChoix = matchNombre ? parseInt(matchNombre[1] || matchNombre[2]) : 3;
+                
+                console.log(`✅ Type détecté: Sélection multiple (${nbChoix} choix)`);
+                
                 if (options.length > 0) {
-                    choicesDiv.innerHTML = '<h4>Choisissez une option :</h4>';
-                    options.forEach(opt => {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn-choice large';
-                        btn.textContent = `${opt.numero}. ${opt.texte}`;
-                        btn.onclick = () => envoyerChoix(opt.numero.toString());
-                        choicesDiv.appendChild(btn);
-                    });
-                }
-            }
-            else if (texte.match(/sélectionnez 3 domaines|3 métiers pour votre podium/i)) {
-                // Checkboxes
-                const options = extraireOptionsNumerotees(texte);
-                const nbChoix = 3;
-                if (options.length > 0) {
-                    choicesDiv.innerHTML = `<h4>Sélectionnez exactement ${nbChoix} choix :</h4>
-                                           <div class="counter" id="counter">0 / ${nbChoix} sélectionné(s)</div>
-                                           <div class="checkbox-group" id="checkboxGroup"></div>`;
+                    choicesDiv.innerHTML = `
+                        <h4>Sélectionnez exactement ${nbChoix} choix :</h4>
+                        <div class="counter" id="counter">0 / ${nbChoix} sélectionné(s)</div>
+                        <div class="checkbox-group" id="checkboxGroup"></div>
+                    `;
                     
                     const checkboxGroup = choicesDiv.querySelector('#checkboxGroup');
                     options.forEach(opt => {
@@ -708,12 +714,34 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
                     choicesDiv.appendChild(btnValidate);
                 }
             }
-            else if (texte.includes('Merci d\'entrer le code')) {
-                // Champ code (déjà géré automatiquement)
+            
+            // TYPE 3 : Choix unique dans une liste (détection large)
+            else if (options.length > 0) {
+                // Si on a des options numérotées et que ce n'est ni OUI/NON ni sélection multiple
+                // → C'est un choix unique dans la liste
+                
+                console.log(`✅ Type détecté: Choix unique (${options.length} options)`);
+                
+                choicesDiv.innerHTML = '<h4>Choisissez une option :</h4>';
+                
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-choice large';
+                    btn.textContent = `${opt.numero}. ${opt.texte}`;
+                    btn.onclick = () => envoyerChoix(opt.numero.toString());
+                    choicesDiv.appendChild(btn);
+                });
+            }
+            
+            // TYPE 4 : Code d'accès (déjà géré automatiquement)
+            else if (texte.includes('Merci d\'entrer le code') || texte.includes('code confidentiel')) {
+                console.log('✅ Type détecté: Code d\'accès (géré automatiquement)');
                 return;
             }
+            
+            // TYPE 5 : Pas de choix attendu
             else {
-                // Pas de choix = fin ou attente
+                console.log('ℹ️ Type détecté: Message informatif (pas de boutons)');
                 return;
             }
 
@@ -722,15 +750,33 @@ Tu dois être directif, structuré et suivre le script à la lettre.`;
 
         // Extraire options numérotées
         function extraireOptionsNumerotees(texte) {
-            const regex = /(\d+)[.)]\s*([^\n]+)/g;
             const options = [];
+            
+            // Méthode 1 : Format "1. Texte" ou "1) Texte"
+            const regex1 = /^(\d+)[.)]\s*([^\n]+)/gm;
             let match;
-            while ((match = regex.exec(texte)) !== null) {
-                options.push({
-                    numero: parseInt(match[1]),
-                    texte: match[2].trim()
-                });
+            while ((match = regex1.exec(texte)) !== null) {
+                const numero = parseInt(match[1]);
+                const texte = match[2].trim();
+                
+                // Éviter les faux positifs (dates, numéros de page, etc.)
+                if (texte.length > 5 && texte.length < 200) {
+                    options.push({ numero, texte });
+                }
             }
+            
+            // Si aucune option trouvée, essayer format liste avec tirets
+            if (options.length === 0) {
+                const regex2 = /^[-•]\s*([^\n]+)/gm;
+                let index = 1;
+                while ((match = regex2.exec(texte)) !== null) {
+                    const texte = match[1].trim();
+                    if (texte.length > 5 && texte.length < 200) {
+                        options.push({ numero: index++, texte });
+                    }
+                }
+            }
+            
             return options;
         }
 
