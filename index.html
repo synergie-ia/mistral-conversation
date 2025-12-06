@@ -139,6 +139,8 @@
         .btn-secondary {
             background: linear-gradient(135deg, #2196F3, #1976D2);
             color: white;
+            width: 100%;
+            margin-top: 20px;
         }
 
         .btn-secondary:hover:not(:disabled) {
@@ -146,113 +148,27 @@
             box-shadow: 0 5px 20px rgba(33, 150, 243, 0.4);
         }
 
-        .btn-choice {
-            background: white;
-            color: #333;
-            border: 2px solid #667eea;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin: 8px;
-            display: inline-block;
-            min-width: 120px;
-        }
-
-        .btn-choice:hover {
-            background: #667eea;
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-choice.large {
-            display: block;
             width: 100%;
-            text-align: left;
-            margin: 10px 0;
-        }
-
-        .choices-container {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
             margin-top: 20px;
         }
 
-        .choices-container h4 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 18px;
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
         }
 
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .checkbox-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 2px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .checkbox-item:hover {
-            border-color: #667eea;
-            transform: translateX(5px);
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .checkbox-item label {
-            cursor: pointer;
-            flex: 1;
-            font-size: 15px;
-        }
-
-        .counter {
-            background: #fff3cd;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: 600;
-            margin: 10px 0;
-            color: #856404;
-        }
-
-        .validation-btn {
-            background: #28a745;
+        .btn-reset {
+            background: #ff5252;
             color: white;
+            margin-top: 10px;
             width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 15px;
         }
 
-        .validation-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .validation-btn:hover:not(:disabled) {
-            background: #218838;
+        .btn-reset:hover {
+            background: #d32f2f;
         }
 
         #conversation {
@@ -359,7 +275,7 @@
                 padding: 0;
             }
 
-            .header, .card:first-child, .btn, .choices-container {
+            .header, .card:first-child, .btn, .status {
                 display: none !important;
             }
 
@@ -374,13 +290,31 @@
                 margin: 10px 0;
             }
         }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🎯 Pass-Orientation</h1>
-            <p>Assistant d'orientation professionnelle - Flux optimisé</p>
+            <p>Diagnostic professionnel personnalisé</p>
         </div>
 
         <div class="card" id="configCard">
@@ -388,7 +322,7 @@
                 <h3>⚙️ Configuration</h3>
                 
                 <div class="input-group">
-                    <label for="codeAccess">🔐 Code d'accès confidentiel</label>
+                    <label for="codeAccess">🔐 Code d\'accès confidentiel</label>
                     <input 
                         type="password" 
                         id="codeAccess" 
@@ -408,7 +342,7 @@
                         placeholder="Entrez votre clé API Mistral"
                     >
                     <div class="info">
-                        Votre clé API n'est jamais stockée et reste confidentielle.
+                        Votre clé API n\'est jamais stockée et reste confidentielle.
                     </div>
                 </div>
 
@@ -416,299 +350,165 @@
                     <label for="userData">📋 Données utilisateur</label>
                     <textarea 
                         id="userData" 
-                        placeholder="Collez ici les données complètes..."
+                        placeholder="Collez ici les données complètes (Profil d'intérêts + Bilan + 3 Univers)..."
                     ></textarea>
                     <div class="info">
-                        Format : Profil d'intérêts (12 dimensions) + Bilan personnel (Q1-Q15) + Univers sélectionnés
+                        Format : Profil d\'intérêts (12 dimensions) + Bilan personnel (Q1-Q15) + 3 Univers sélectionnés
                     </div>
                 </div>
 
                 <div class="warning">
                     <strong>ℹ️ À propos des suggestions</strong><br>
-                    Les métiers et formations proposés sont des suggestions optimisées. 
-                    D'autres possibilités existent selon votre situation personnelle.
+                    Les métiers et formations proposés sont des suggestions personnalisées basées sur votre profil. 
+                    D\'autres possibilités existent selon votre situation.
                 </div>
 
                 <button class="btn btn-primary" onclick="demarrer()">
-                    🚀 Démarrer l'orientation
+                    🚀 Démarrer le diagnostic
                 </button>
             </div>
         </div>
 
-        <div id="conversation">
-            <div class="info" style="margin-top: 20px;">
-                👆 Configurez le code d'accès, votre clé API et collez les données utilisateur
-            </div>
-        </div>
+        <div id="conversation"></div>
 
-        <button id="btnPrint" class="btn btn-secondary" onclick="imprimerSynthese()" style="display: none; margin-top: 20px;">
-            🖨️ Imprimer la synthèse
+        <button id="btnDownload" class="btn btn-success" onclick="telechargerPDF()" style="display: none;">
+            📥 Télécharger la synthèse (PDF)
+        </button>
+
+        <button id="btnReset" class="btn btn-reset" onclick="reinitialiser()" style="display: none;">
+            🔄 Nouvelle session
         </button>
     </div>
 
     <div id="status" class="status"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         const CODE_CONFIDENTIEL = "197475";
+        const STORAGE_KEY = "pass_orientation_session";
         
         let conversationState = {
             historique: [],
             etape: 'config',
             enCours: false,
-            tokensTotal: { input: 0, output: 0 }
+            tokensTotal: { input: 0, output: 0 },
+            apiKey: '',
+            userData: '',
+            sessionActive: false
         };
 
         const INSTRUCTIONS_SYSTEME = `Tu es l'assistant Pass-Orientation, expert en orientation professionnelle.
 
 ═══════════════════════════════════════════════════════════════════
-RÈGLES ABSOLUES DE COMPORTEMENT
+FLUX DU PROCESSUS (6 ÉTAPES)
 ═══════════════════════════════════════════════════════════════════
 
-1. SUIVRE LE PROCESSUS LINÉAIRE STRICT (14 étapes - UN SEUL UNIVERS)
-2. QUESTIONS FERMÉES UNIQUEMENT (OUI/NON ou numéros)
-3. MISE EN FORME OBLIGATOIRE (voir ci-dessous)
-4. AUCUNE IMPROVISATION
-5. UN SEUL UNIVERS EXPLORÉ PAR SÉANCE
+**ÉTAPE 1 : DIAGNOSTIC PROFIL** (10 lignes maximum)
 
-═══════════════════════════════════════════════════════════════════
-PROCESSUS EN 14 ÉTAPES
-═══════════════════════════════════════════════════════════════════
+Message d'accueil :
+"Bonjour, je suis l'assistant virtuel « Pass-Orientation ». 🎯
 
-**Étape 1 : Accueil + Contrôle qualité**
+Je vais établir un diagnostic personnalisé de votre profil professionnel.
 
-"Bonjour, je suis l'assistant virtuel « Pass-orientation ». 🎯
+Notre parcours :
+• Analyse de votre profil d'intérêts
+• Exploration de vos 3 univers professionnels
+• Recommandations métiers et formations
 
-Je vais vous accompagner dans l'exploration de vos possibilités professionnelles.
+Commençons par votre diagnostic..."
 
-Notre parcours ensemble :
-• Validation de vos données
-• Sélection d'un univers professionnel adapté
-• Découverte de 5 métiers correspondant à votre profil
-• Identification de vos 2 métiers prioritaires
-• Parcours de formation (optionnel)
-
-Je vais maintenant analyser vos données..."
-
-Puis VÉRIFIER :
-• Profil d'intérêts (12 dimensions + 3 dominantes) : ✅ ou ❌
-• Bilan personnel (Q1-Q15) : ✅ ou ❌
-• Univers sélectionnés (3-5 avec compatibilité) : ✅ ou ❌
-
-Si TOUT OK : "✅ Données validées. Nous pouvons démarrer."
-Si PROBLÈME : "❌ Problème détecté : [liste] - Impossible de poursuivre."
-
-**Étape 2 : Choix univers**
-
-"VOS UNIVERS SÉLECTIONNÉS (classés par compatibilité)
-
-[Liste numérotée avec scores]
-
-Par quel univers souhaitez-vous commencer votre exploration ?
-Merci d'indiquer le numéro de l'univers choisi."
-
-**Étape 3 : Génération + Sélection 3 domaines**
-
-Tu dois générer toi-même 6 à 8 **DOMAINES LARGES** ADAPTÉS à l'univers choisi et au profil utilisateur.
-
-"UNIVERS : [Nom]
-
-Voici les domaines disponibles dans cet univers :
-
-[Liste numérotée 1-8 avec description 1 ligne chacun - DOMAINES LARGES]
-
-Vous devez sélectionner 3 domaines à explorer.
-Merci d'indiquer les numéros des domaines qui vous intéressent.
-Exemple : 2, 5, 7"
-
-**Étape 4 : Génération TOP 5 métiers** (processus interne)
-
-Générer EXACTEMENT 5 métiers (les MEILLEURS) répartis sur les 3 domaines.
-
-**Étape 5-7 : Présentation des 5 métiers (2-2-1)**
-
-Présenter les métiers 1-2, PUIS :
-"⏸️ **Prenez le temps d'analyser ces métiers avant de poursuivre.**
-
-Cliquez sur **Continuer** quand vous êtes prêt."
-
-Présenter les métiers 3-4, PUIS même message.
-Présenter le métier 5, PUIS même message.
-
-**FORMAT OBLIGATOIRE pour CHAQUE métier** :
+Puis générer le DIAGNOSTIC :
 
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-**MÉTIER [N] : [Nom du métier]**
+📊 **DIAGNOSTIC DE VOTRE PROFIL**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📂 **DOMAINE** : [Nom domaine] — 🌐 **UNIVERS** : [Nom univers]
+🎯 **DIMENSIONS PRINCIPALES** : [3 ou 4 dimensions les plus élevées parmi les 12]
 
-🔍 **EN QUOI CONSISTE CE MÉTIER ?**
-[Description 3-4 lignes]
+**Votre profil se caractérise par :**
+[5-6 lignes analysant les dimensions dominantes]
 
-📋 **MISSIONS PRINCIPALES** :
-• [Mission 1]
-• [Mission 2]
-• [Mission 3]
-• [Mission 4]
+**Au niveau de votre situation actuelle :**
+[3-4 lignes analysant les réponses Q1-Q15 - points saillants]
 
-🏢 **ENVIRONNEMENT DE TRAVAIL** :
-• **Lieux** : [détails]
-• **Rythme** : [détails]
-• **Relations** : [détails]
+**Ce qui ressort particulièrement :**
+[2-3 lignes sur ce qui est le plus marquant]
 
-✨ **POURQUOI CE MÉTIER VOUS CORRESPOND** :
-[Analyse personnalisée 4-5 lignes liée au profil d'intérêts (12 dimensions : MP, MT, ST, IN, AE, RS, AI, IC, AA, LS, RM, DC)]
+⏸️ Prenez le temps d'analyser votre diagnostic.
+Cliquez sur **Continuer** quand vous êtes prêt à découvrir vos possibilités."
 
-**INTERDIT ABSOLU** : Ne JAMAIS mentionner "RIASEC" ni les codes R-I-A-S-E-C.
+**INTERDICTION ABSOLUE** : NE PAS mentionner de métiers ou formations à cette étape.
 
-🎯 **ACCÈS ET FAISABILITÉ** :
-• **Niveau** : **[FORTE / MOYENNE / FAIBLE]**
-• **Justification** : [2-3 lignes]
+**ÉTAPE 2 : PAUSE** → Bouton [Continuer]
 
-📈 **MARCHÉ** : **[DYNAMIQUE / STABLE / EN TENSION]**
-*[1 ligne d'explication]*
+**ÉTAPES 3, 4, 5 : POUR CHAQUE UNIVERS (x3)**
 
-💰 **RÉMUNÉRATION** :
-• Débutant : [X] € – [Y] € brut/an
-• Confirmé (5-10 ans) : [X] € – [Y] € brut/an
-• Expert (10+ ans) : [X] € – [Y] € brut/an
-
-⚠️ **POINTS DE VIGILANCE** :
-• [Point 1]
-• [Point 2]"
-
-**Étape 8 : Récapitulatif + Scénarios**
+Pour chaque univers parmi les 3 fournis :
 
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 **RÉCAPITULATIF DES 5 MÉTIERS PRÉSENTÉS**
+🌐 **UNIVERS : [NOM]** — [X]% de compatibilité
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. [Nom métier] — [Domaine]
-2. [Nom métier] — [Domaine]
-3. [Nom métier] — [Domaine]
-4. [Nom métier] — [Domaine]
-5. [Nom métier] — [Domaine]
+**🎯 TOP 3 DES MÉTIERS**
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 **SCÉNARIOS POUR VOUS AIDER À CHOISIR**
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**1. [Nom métier]**
+*Pourquoi ce métier :* [2-3 lignes max expliquant le lien avec profil global]
 
-[Générer 2-3 scénarios avec format :]
+📚 **Top 3 formations :**
+• **[Formation 1]** — *[1 ligne : pourquoi adaptée]*
+• **[Formation 2]** — *[1 ligne : pourquoi adaptée]*
+• **[Formation 3]** — *[1 ligne : pourquoi adaptée]*
 
-**SCÉNARIO [N]** : *[Titre]*
-→ **Métiers recommandés** : *[numéros]*
-→ **Pourquoi** : *[explication]*
+**2. [Nom métier]**
+*Pourquoi ce métier :* [2-3 lignes max expliquant le lien avec profil global]
 
-⏸️ **Prenez le temps d'analyser ces scénarios.**
+📚 **Top 3 formations :**
+• **[Formation 1]** — *[1 ligne : pourquoi adaptée]*
+• **[Formation 2]** — *[1 ligne : pourquoi adaptée]*
+• **[Formation 3]** — *[1 ligne : pourquoi adaptée]*
 
-Cliquez sur **Continuer** quand vous êtes prêt."
+**3. [Nom métier]**
+*Pourquoi ce métier :* [2-3 lignes max expliquant le lien avec profil global]
 
-**Étape 9 : Choix 2 métiers prioritaires**
+📚 **Top 3 formations :**
+• **[Formation 1]** — *[1 ligne : pourquoi adaptée]*
+• **[Formation 2]** — *[1 ligne : pourquoi adaptée]*
+• **[Formation 3]** — *[1 ligne : pourquoi adaptée]*
+
+⏸️ Prenez le temps d'analyser ces possibilités.
+Cliquez sur **Continuer** pour [l'univers suivant / la clôture]."
+
+**ÉTAPE 6 : CLÔTURE** (après le 3ème univers)
 
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 **VOS 2 MÉTIERS PRIORITAIRES**
+🎯 **FIN DU DIAGNOSTIC**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Parmi ces 5 métiers, quels sont les 2 qui vous intéressent le plus ?
+Votre diagnostic personnalisé est maintenant complet.
 
-Choisissez votre Plan A et votre Plan B.
-
-Merci d'indiquer 2 numéros.
-Exemple : "1, 3""
-
-**Étape 10 : Question parcours formations**
-
-"Souhaitez-vous consulter les **parcours de formation** pour vos 2 métiers prioritaires ? **(OUI / NON)**"
-
-Si **NON** → passer directement à Étape 13 (Synthèse univers)
-
-**Étape 11-12 : Parcours formations** (UNIQUEMENT si OUI à Étape 10)
-
-Pour CHAQUE métier prioritaire, générer 2 parcours détaillés avec conseil stratégique.
-
-**Étape 13 : Synthèse univers** (OBLIGATOIRE même si NON aux parcours)
-
-"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 **SYNTHÈSE DE VOTRE EXPLORATION**
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🌐 **UNIVERS EXPLORÉ**
-[Nom univers] — [X]% de compatibilité
-
-📂 **DOMAINES SÉLECTIONNÉS** (3/[6-8])
-• [Numéro]. [Nom domaine]
-  → [Description courte]
-
-🎯 **MÉTIERS ANALYSÉS** (5 métiers)
-1. **[Nom métier]**
-   • Domaine : [Nom]
-   • Faisabilité : [FORTE/MOYENNE/FAIBLE]
-   • Marché : [DYNAMIQUE/STABLE]
-   • Salaire débutant : [X-Y]K€/an
-
-🏆 **VOS 2 MÉTIERS PRIORITAIRES**
-→ **Plan A : Métier [N]** - [Nom métier]
-   *Pourquoi : [2 lignes]*
-
-→ **Plan B : Métier [N]** - [Nom métier]
-   *Pourquoi : [2 lignes]*
-
-[SI OUI aux parcours]
-🎓 **PARCOURS IDENTIFIÉS**
-• Métier [N] : [Formation recommandée]
-• Métier [N] : [Formation recommandée]
-
-[SI NON aux parcours]
-💡 **POUR ALLER PLUS LOIN**
-• Vous renseigner sur les formations
-• Contacter un conseiller d'orientation
-• Rencontrer des professionnels
-• Explorer les offres d'emploi/alternance
-
-💡 **POINTS CLÉS À RETENIR**
-• Ces métiers correspondent à votre profil [dimensions]
-• Accessibles avec [niveau]
-• Secteurs [marché]
-
-🚀 **PROCHAINES ÉTAPES RECOMMANDÉES**
-1. [Action 1]
-2. [Action 2]
-3. [Action 3]"
-
-**Étape 14 : Clôture**
-
-"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 **CLÔTURE DE LA SÉANCE**
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Merci d'avoir utilisé « Pass-orientation ». Cette séance est maintenant terminée.
-
-💡 **Rappels importants** :
-• Sauvegardez cette conversation (bouton Imprimer)
+💡 **Recommandations :**
+• Téléchargez votre synthèse
 • Contactez un conseiller d'orientation
-• L'orientation est un cheminement
+• Explorez les formations qui vous correspondent
 
-La séance est maintenant close. Aucune autre action n'est possible."
+Vous pouvez maintenant télécharger votre synthèse complète.
+
+La session est terminée."
 
 ═══════════════════════════════════════════════════════════════════
-INTERDICTIONS ABSOLUES
+RÈGLES ABSOLUES
 ═══════════════════════════════════════════════════════════════════
 
-1. Ne JAMAIS poser de question ouverte
-2. Ne JAMAIS demander "avez-vous des questions ?"
-3. Ne JAMAIS générer moins ou plus de 5 métiers
-4. Ne JAMAIS sauter l'affichage des 5 métiers
-5. Ne JAMAIS oublier les scénarios d'aide au choix
-6. Ne JAMAIS dévier de la mise en forme obligatoire
-7. Ne JAMAIS proposer de créer un CV ou lettre de motivation
-8. Ne JAMAIS proposer d'aide après la clôture (Étape 14)
-9. **Ne JAMAIS mentionner d'ANNÉES (2024, 2025, etc.)** → Dire "rentrée prochaine", "inscriptions au printemps"
-10. Ne JAMAIS proposer d'explorer un autre univers après la synthèse
-11. Après Étape 14 : STOP COMPLET
-12. TOUJOURS vouvoyer
-13. **Ne JAMAIS mentionner "RIASEC"** → Utiliser uniquement les 12 dimensions
-14. Ne JAMAIS mentionner la "catégorie" du profil
-15. La synthèse univers (Étape 13) est TOUJOURS obligatoire
+1. **ÉTAPE 1** : Diagnostic uniquement - AUCUN métier/formation
+2. **ÉTAPES 3-5** : EXACTEMENT 3 métiers par univers
+3. **ÉTAPES 3-5** : EXACTEMENT 3 formations par métier
+4. TOUJOURS synthétique (quelques lignes max)
+5. TOUJOURS aller à l'essentiel
+6. Ne JAMAIS mentionner "RIASEC" - utiliser les 12 dimensions
+7. Ne JAMAIS mentionner d'années (2024, 2025) - dire "rentrée prochaine"
+8. TOUJOURS vouvoyer
+9. Ne JAMAIS proposer CV ou lettre de motivation
+10. Après clôture : STOP TOTAL
 
 ═══════════════════════════════════════════════════════════════════
 MISE EN FORME OBLIGATOIRE
@@ -716,10 +516,75 @@ MISE EN FORME OBLIGATOIRE
 
 • Utiliser **gras** pour les titres
 • Utiliser *italique* pour les explications
-• Utiliser des émojis (🎯 📋 💡 ✨ ⚠️)
+• Utiliser des émojis (🎯 📊 🌐 📚 💡)
 • Séparer les sections avec ━━━━━━
 • Structurer les listes avec •
 `;
+
+        // Charger session au démarrage
+        window.addEventListener('DOMContentLoaded', () => {
+            chargerSession();
+        });
+
+        // Sauvegarder session avant fermeture
+        window.addEventListener('beforeunload', () => {
+            if (conversationState.sessionActive) {
+                sauvegarderSession();
+            }
+        });
+
+        function sauvegarderSession() {
+            const sessionData = {
+                historique: conversationState.historique,
+                tokensTotal: conversationState.tokensTotal,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
+        }
+
+        function chargerSession() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const sessionData = JSON.parse(saved);
+                    // Vérifier que la session a moins de 24h
+                    if (Date.now() - sessionData.timestamp < 24 * 60 * 60 * 1000) {
+                        conversationState.historique = sessionData.historique;
+                        conversationState.tokensTotal = sessionData.tokensTotal;
+                        
+                        // Restaurer la conversation
+                        document.getElementById('configCard').style.display = 'none';
+                        document.getElementById('conversation').innerHTML = '';
+                        
+                        conversationState.historique.forEach(msg => {
+                            if (msg.role === 'user' || msg.role === 'assistant') {
+                                ajouterMessage(msg.role, msg.content);
+                            }
+                        });
+                        
+                        const lastMsg = conversationState.historique[conversationState.historique.length - 1];
+                        if (lastMsg && lastMsg.role === 'assistant') {
+                            genererBoutons(lastMsg.content);
+                        }
+                        
+                        conversationState.sessionActive = true;
+                        afficherStatut('✅ Session restaurée');
+                    } else {
+                        localStorage.removeItem(STORAGE_KEY);
+                    }
+                } catch (e) {
+                    console.error('Erreur chargement session:', e);
+                    localStorage.removeItem(STORAGE_KEY);
+                }
+            }
+        }
+
+        function reinitialiser() {
+            if (confirm('Voulez-vous vraiment démarrer une nouvelle session ? Toutes les données actuelles seront perdues.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
 
         function verifierCodeAcces() {
             const code = document.getElementById('codeAccess').value;
@@ -755,6 +620,10 @@ MISE EN FORME OBLIGATOIRE
                 return;
             }
 
+            conversationState.apiKey = apiKey;
+            conversationState.userData = userData;
+            conversationState.sessionActive = true;
+
             document.getElementById('configCard').style.display = 'none';
             
             conversationState.historique = [
@@ -762,10 +631,10 @@ MISE EN FORME OBLIGATOIRE
                 { role: "user", content: `Voici mes données :\n\n${userData}` }
             ];
             
-            envoyerMessage(apiKey);
+            envoyerMessage();
         }
 
-        async function envoyerMessage(apiKey, texteUtilisateur = null) {
+        async function envoyerMessage(texteUtilisateur = null) {
             if (conversationState.enCours) return;
             
             if (texteUtilisateur) {
@@ -778,18 +647,18 @@ MISE EN FORME OBLIGATOIRE
             }
 
             conversationState.enCours = true;
-            afficherStatut('⏳ Mistral réfléchit...');
+            afficherStatut('⏳ Mistral analyse...');
 
             try {
                 const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
+                        'Authorization': `Bearer ${conversationState.apiKey}`
                     },
                     body: JSON.stringify({
                         model: "mistral-large-latest",
-                        max_tokens: 4000,
+                        max_tokens: 3000,
                         temperature: 0.5,
                         stream: true,
                         messages: conversationState.historique
@@ -851,12 +720,15 @@ MISE EN FORME OBLIGATOIRE
                     content: accumulatedText
                 });
 
+                sauvegarderSession();
                 genererBoutons(accumulatedText);
 
-                if (accumulatedText.includes('CLÔTURE DE LA SÉANCE') || 
-                    accumulatedText.includes('La séance est maintenant close')) {
+                if (accumulatedText.includes('FIN DU DIAGNOSTIC') || 
+                    accumulatedText.includes('La session est terminée')) {
                     afficherTokens();
-                    document.getElementById('btnPrint').style.display = 'inline-flex';
+                    document.getElementById('btnDownload').style.display = 'inline-flex';
+                    document.getElementById('btnReset').style.display = 'inline-flex';
+                    conversationState.sessionActive = false;
                     return;
                 }
 
@@ -899,166 +771,23 @@ MISE EN FORME OBLIGATOIRE
             const oldChoices = document.getElementById('choicesZone');
             if (oldChoices) oldChoices.remove();
 
-            if (texte.includes('CLÔTURE DE LA SÉANCE') || 
-                texte.includes('La séance est maintenant close')) {
-                afficherTokens();
-                document.getElementById('btnPrint').style.display = 'inline-flex';
+            if (texte.includes('FIN DU DIAGNOSTIC') || 
+                texte.includes('La session est terminée')) {
                 return;
             }
 
-            const choicesDiv = document.createElement('div');
-            choicesDiv.id = 'choicesZone';
-            choicesDiv.className = 'choices-container';
-
-            const options = extraireOptionsNumerotees(texte);
-            
-            // PRIORITÉ 1 : Bouton Continuer
             if (texte.match(/Prenez le temps|Cliquez sur.*Continuer/i)) {
+                const choicesDiv = document.createElement('div');
+                choicesDiv.id = 'choicesZone';
                 choicesDiv.innerHTML = `
-                    <h4>Quand vous êtes prêt :</h4>
-                    <button class="btn btn-secondary" onclick="envoyerChoix(&quot;Continuer&quot;)">▶️ Continuer</button>
+                    <button class="btn btn-secondary" onclick="envoyerChoix('Continuer')">▶️ Continuer</button>
                 `;
+                conversation.appendChild(choicesDiv);
             }
-            // PRIORITÉ 2 : Choix univers (numéros)
-            else if (texte.match(/par quel univers|univers.*commencer|univers.*exploration|indiquez.*numéro.*univers/i) && options.length > 0) {
-                choicesDiv.innerHTML = '<h4>Choisissez un univers :</h4>';
-                options.forEach(opt => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-choice large';
-                    btn.textContent = `${opt.numero}. ${opt.texte}`;
-                    btn.onclick = () => envoyerChoix(opt.numero.toString());
-                    choicesDiv.appendChild(btn);
-                });
-            }
-            // PRIORITÉ 3 : Sélection 3 domaines (checkboxes)
-            else if (texte.match(/sélectionnez?\s+3\s+domaines|3\s+domaines.*explorer|Vous devez sélectionner 3/i) && options.length > 0) {
-                choicesDiv.innerHTML = `
-                    <h4>Sélectionnez exactement 3 domaines :</h4>
-                    <div class="info">Cochez 3 cases ci-dessous, puis validez.</div>
-                    <div class="counter" id="counter">0 / 3 sélectionné(s)</div>
-                    <div class="checkbox-group" id="checkboxGroup"></div>
-                `;
-                
-                const checkboxGroup = choicesDiv.querySelector('#checkboxGroup');
-                options.forEach(opt => {
-                    const div = document.createElement('div');
-                    div.className = 'checkbox-item';
-                    div.innerHTML = `
-                        <input type="checkbox" id="cb${opt.numero}" value="${opt.numero}" onchange="updateCounter(3)">
-                        <label for="cb${opt.numero}">${opt.numero}. ${opt.texte}</label>
-                    `;
-                    checkboxGroup.appendChild(div);
-                });
-                
-                const btnValidate = document.createElement('button');
-                btnValidate.className = 'validation-btn';
-                btnValidate.id = 'validateBtn';
-                btnValidate.disabled = true;
-                btnValidate.textContent = 'Valider mes 3 choix';
-                btnValidate.onclick = () => envoyerSelectionMultiple(3);
-                choicesDiv.appendChild(btnValidate);
-            }
-            // PRIORITÉ 4 : Choix 2 métiers prioritaires (checkboxes) - DOIT ÊTRE AVANT OUI/NON
-            else if (texte.match(/VOS 2 MÉTIERS PRIORITAIRES|indiquez\s+2\s+numéros|Plan\s+A.*Plan\s+B/i) && 
-                     !texte.match(/parcours.*formation.*\*\*\(OUI\s*\/\s*NON\)\*\*/i)) {
-                choicesDiv.innerHTML = `
-                    <h4>Sélectionnez exactement 2 métiers :</h4>
-                    <div class="info">Cochez 2 cases ci-dessous, puis validez.</div>
-                    <div class="counter" id="counter">0 / 2 sélectionné(s)</div>
-                    <div class="checkbox-group" id="checkboxGroup"></div>
-                `;
-                
-                const checkboxGroup = choicesDiv.querySelector('#checkboxGroup');
-                for (let i = 1; i <= 5; i++) {
-                    const div = document.createElement('div');
-                    div.className = 'checkbox-item';
-                    div.innerHTML = `
-                        <input type="checkbox" id="cb${i}" value="${i}" onchange="updateCounter(2)">
-                        <label for="cb${i}">Métier ${i}</label>
-                    `;
-                    checkboxGroup.appendChild(div);
-                }
-                
-                const btnValidate = document.createElement('button');
-                btnValidate.className = 'validation-btn';
-                btnValidate.id = 'validateBtn';
-                btnValidate.disabled = true;
-                btnValidate.textContent = 'Valider mes 2 choix';
-                btnValidate.onclick = () => envoyerSelectionMultiple(2);
-                choicesDiv.appendChild(btnValidate);
-            }
-            // PRIORITÉ 5 : OUI/NON explicite avec ** (OUI / NON) **
-            else if (texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*/i)) {
-                choicesDiv.innerHTML = `
-                    <h4>Votre réponse :</h4>
-                    <button class="btn-choice" onclick="envoyerChoix(&quot;OUI&quot;)">✅ OUI</button>
-                    <button class="btn-choice" onclick="envoyerChoix(&quot;NON&quot;)">❌ NON</button>
-                `;
-            }
-            // PRIORITÉ 6 : Questions avec OUI/NON implicite (uniquement si pas de ** (OUI / NON) ** et pas d'options numérotées)
-            else if (texte.match(/souhaitez-vous|voulez-vous|confirmez-vous/i) && 
-                     options.length === 0 && 
-                     !texte.match(/\*\*\(OUI\s*\/\s*NON\)\*\*/i)) {
-                choicesDiv.innerHTML = `
-                    <h4>Votre réponse :</h4>
-                    <button class="btn-choice" onclick="envoyerChoix(&quot;OUI&quot;)">✅ OUI</button>
-                    <button class="btn-choice" onclick="envoyerChoix(&quot;NON&quot;)">❌ NON</button>
-                `;
-            }
-            // DEFAULT : Options numérotées simples
-            else if (options.length > 0) {
-                choicesDiv.innerHTML = '<h4>Choisissez une option :</h4>';
-                options.forEach(opt => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-choice large';
-                    btn.textContent = `${opt.numero}. ${opt.texte}`;
-                    btn.onclick = () => envoyerChoix(opt.numero.toString());
-                    choicesDiv.appendChild(btn);
-                });
-            }
-            else {
-                return;
-            }
-
-            conversation.appendChild(choicesDiv);
-        }
-
-        function extraireOptionsNumerotees(texte) {
-            const options = [];
-            const regex = /^(\d+)[.)]\s*([^\n]+)/gm;
-            let match;
-            while ((match = regex.exec(texte)) !== null) {
-                const numero = parseInt(match[1], 10);
-                const t = match[2].trim();
-                if (t.length > 5 && t.length < 250) {
-                    options.push({ numero, texte: t });
-                }
-            }
-            return options;
-        }
-
-        function updateCounter(maxChoix) {
-            const checked = document.querySelectorAll('#checkboxGroup input[type="checkbox"]:checked');
-            const counter = document.getElementById('counter');
-            const validateBtn = document.getElementById('validateBtn');
-            
-            counter.textContent = `${checked.length} / ${maxChoix} sélectionné(s)`;
-            validateBtn.disabled = checked.length !== maxChoix;
-        }
-
-        function envoyerSelectionMultiple(nbChoix) {
-            const checked = document.querySelectorAll('#checkboxGroup input[type="checkbox"]:checked');
-            if (checked.length !== nbChoix) {
-                alert(`Veuillez sélectionner exactement ${nbChoix} choix.`);
-                return;
-            }
-            const numeros = Array.from(checked).map(cb => cb.value).join(', ');
-            envoyerChoix(numeros);
         }
 
         function envoyerChoix(choix) {
-            const apiKey = document.getElementById('apiKey').value.trim();
-            envoyerMessage(apiKey, choix);
+            envoyerMessage(choix);
         }
 
         function afficherTokens() {
@@ -1083,8 +812,40 @@ MISE EN FORME OBLIGATOIRE
             conversation.appendChild(tokensDiv);
         }
 
-        function imprimerSynthese() {
-            window.print();
+        function telechargerPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const messages = document.querySelectorAll('.message.assistant');
+            let y = 20;
+            const lineHeight = 7;
+            const pageHeight = doc.internal.pageSize.height;
+            const margin = 20;
+            
+            doc.setFontSize(16);
+            doc.text('Pass-Orientation - Synthèse', margin, y);
+            y += 15;
+            
+            doc.setFontSize(10);
+            
+            messages.forEach((msg, index) => {
+                const content = msg.querySelector('.message-content').textContent;
+                const lines = doc.splitTextToSize(content, 170);
+                
+                lines.forEach(line => {
+                    if (y > pageHeight - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.text(line, margin, y);
+                    y += lineHeight;
+                });
+                
+                y += 10;
+            });
+            
+            doc.save('pass-orientation-synthese.pdf');
+            afficherStatut('✅ PDF téléchargé', 3000);
         }
     </script>
 </body>
